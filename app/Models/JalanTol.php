@@ -13,7 +13,8 @@ class JalanTol extends Model
 
     protected $fillable = [
         'user_id',
-        'nama_jalan_tol',
+        'nama',
+        'kode',
         'tahun',
     ];
 

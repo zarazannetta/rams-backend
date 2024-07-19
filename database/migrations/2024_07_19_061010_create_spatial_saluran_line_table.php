@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_saluran_line', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiLineString('geom');
             $table->string('layer')->nullable();
             $table->string('jenis_material')->nullable();
             $table->string('kondisi')->nullable();

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_lampu_lalulintas_point', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPoint('geom');
             $table->double('absis_x')->nullable();
             $table->double('ordinat_y')->nullable();
             $table->timestamps();

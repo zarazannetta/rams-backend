@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Http\Resources\GeoJSONResource;
 
+use App\Models\JalanTol;
 use App\Models\Spatial\AdministratifPolygon;
 use App\Models\Spatial\BatasDesaLine;
 use App\Models\Spatial\BoxCulvertLine;
@@ -60,8 +62,34 @@ use App\Models\Spatial\VMSPoint;
 
 class InputController extends Controller
 {
-    public function uploadAsset(Request $request)
+    public function inputRuas(Request $request)
     {
+        $request->validate([
+            'nama' => 'required',
+            'kode' => 'required',
+            'tahun' => 'required',
+        ]);
+
+        if (Auth::user()->role_id == 1) {
+            $ruas_data = $request->all();
+            $ruas_data['user_id'] = Auth::user()->id;
+
+            JalanTol::create($ruas_data);
+            return response()->json(['message' => 'Success']);
+        }
+        else {
+            abort(403);
+        }
+    }
+    
+    public function inputAset(Request $request)
+    {
+        $request->validate([
+            'ruas_id' => 'required',
+            'tipe_aset' => 'required',
+            'geojson' => 'required',
+        ]);
+
         $uploadFunctions = [
             'administratif_polygon' => 'uploadAdministratifPolygon',
             'batas_desa_line' => 'uploadBatasDesaLine',
@@ -115,10 +143,15 @@ class InputController extends Controller
             'vms_point' => 'uploadVMSPoint',
         ];
 
-        if (array_key_exists($request->type, $uploadFunctions)) {
-            return $this->{$uploadFunctions[$type]}($request);
-        } else {
-            abort(404, 'Upload type not found');
+        if (Auth::user()->role_id == 1) {
+            if (array_key_exists($request->tipe_aset, $uploadFunctions)) {
+                return $this->{$uploadFunctions[$request->tipe_aset]}($request);
+            } else {
+                abort(404, 'Tipe Aset tidak ditemukan');
+            }
+        }
+        else {
+            abort(403);
         }
     }
     
@@ -128,7 +161,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -183,7 +216,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -220,7 +253,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -263,7 +296,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -306,7 +339,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -343,7 +376,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -380,7 +413,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -443,7 +476,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -480,7 +513,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -517,7 +550,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -562,7 +595,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -599,7 +632,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -646,7 +679,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -683,7 +716,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -732,7 +765,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -777,7 +810,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -816,7 +849,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -855,7 +888,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -894,7 +927,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -933,7 +966,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -972,7 +1005,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1021,7 +1054,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1058,7 +1091,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1101,7 +1134,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1138,7 +1171,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1177,7 +1210,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1216,7 +1249,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1255,7 +1288,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1296,7 +1329,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1333,7 +1366,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1370,7 +1403,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1407,7 +1440,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1444,7 +1477,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1481,7 +1514,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1518,7 +1551,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1555,7 +1588,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1598,7 +1631,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1635,7 +1668,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1672,7 +1705,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1719,7 +1752,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1758,7 +1791,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1797,7 +1830,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1834,7 +1867,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1901,7 +1934,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1940,7 +1973,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -1977,7 +2010,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -2014,7 +2047,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -2051,7 +2084,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -2088,7 +2121,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));
@@ -2125,7 +2158,7 @@ class InputController extends Controller
             $file = $request->file('geojson');
             $filename = $this->generateRandomString();
             $file->move('temp', $filename);
-            $jalan_tol_id = $request->ruas;
+            $jalan_tol_id = $request->ruas_id;
 
             // Insert Data
             $geojson = file_get_contents(public_path('temp/'.$filename));

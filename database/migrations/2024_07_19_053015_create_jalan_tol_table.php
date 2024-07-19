@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('jalan_tol', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('nama_jalan_tol');
+            $table->string('nama');
+            $table->string('kode');
             $table->integer('tahun');
             $table->timestamps();
 

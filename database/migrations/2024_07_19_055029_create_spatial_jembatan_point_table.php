@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_jembatan_point', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPoint('geom');
             $table->string('nama')->nullable();
             $table->string('km')->nullable();
             $table->string('panjang')->nullable();

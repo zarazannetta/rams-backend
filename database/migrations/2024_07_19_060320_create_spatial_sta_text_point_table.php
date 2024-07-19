@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_sta_text_point', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPoint('geom');
             $table->string('sta')->nullable();
             $table->timestamps();
 
