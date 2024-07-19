@@ -27,6 +27,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('spatial_vms_point', function (Blueprint $table) {
+            $table->dropForeign(['jalan_tol_id']);
+        });
         Schema::dropIfExists('spatial_vms_point');
     }
 };

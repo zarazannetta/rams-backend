@@ -33,6 +33,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('spatial_lhr_polygon', function (Blueprint $table) {
+            $table->dropForeign(['jalan_tol_id']);
+        });
         Schema::dropIfExists('spatial_lhr_polygon');
     }
 };

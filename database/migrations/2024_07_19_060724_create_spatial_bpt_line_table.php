@@ -30,6 +30,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('spatial_bpt_line', function (Blueprint $table) {
+            $table->dropForeign(['jalan_tol_id']);
+        });
         Schema::dropIfExists('spatial_bpt_line');
     }
 };

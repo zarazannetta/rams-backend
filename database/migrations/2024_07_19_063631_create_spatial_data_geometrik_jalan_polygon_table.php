@@ -40,6 +40,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('spatial_data_geometrik_lingkungan_jalan_polygon');
+        Schema::table('spatial_data_geometrik_jalan_polygon', function (Blueprint $table) {
+            $table->dropForeign(['jalan_tol_id']);
+        });
+        Schema::dropIfExists('spatial_data_geometrik_jalan_polygon');
     }
 };
