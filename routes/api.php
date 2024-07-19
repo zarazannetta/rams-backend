@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\InputController;
+use App\Http\Controllers\OutputController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,5 +35,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('data/input-ruas', [InputController::class, 'inputRuas']);
     Route::post('data/input-aset', [InputController::class, 'inputAset']);
 });
+
+// Output Aset
+Route::get('data/aset/{type}', [OutputController::class, 'getAset']);
 
 Route::post('/login', [AuthController::class, 'login']);

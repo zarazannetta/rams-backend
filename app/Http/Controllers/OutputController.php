@@ -124,7 +124,7 @@ class OutputController extends Controller
 
     public function getAdministratifPolygon()
     {
-        $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -136,7 +136,7 @@ class OutputController extends Controller
 
     public function getBatasDesaLine()
     {
-        $data = BatasDesaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BatasDesaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -148,7 +148,7 @@ class OutputController extends Controller
 
     public function getBoxCulvertLine()
     {
-        $data = BoxCulvertLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BoxCulvertLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -160,7 +160,7 @@ class OutputController extends Controller
 
     public function getBPTLine()
     {
-        $data = BPTLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BPTLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -172,7 +172,7 @@ class OutputController extends Controller
 
     public function getBronjongLine()
     {
-        $data = BronjongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BronjongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -184,7 +184,7 @@ class OutputController extends Controller
 
     public function getConcreteBarrierLine()
     {
-        $data = ConcreteBarrierLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ConcreteBarrierLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -196,7 +196,7 @@ class OutputController extends Controller
 
     public function getDataGeometrikJalanPolygon()
     {
-        $data = DataGeometrikJalanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = DataGeometrikJalanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -208,7 +208,7 @@ class OutputController extends Controller
 
     public function getGerbangLine()
     {
-        $data = GerbangLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GerbangLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -220,7 +220,7 @@ class OutputController extends Controller
 
     public function getGerbangPoint()
     {
-        $data = GerbangPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GerbangPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -232,7 +232,7 @@ class OutputController extends Controller
 
     public function getGorongGorongLine()
     {
-        $data = GorongGorongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GorongGorongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -244,7 +244,7 @@ class OutputController extends Controller
 
     public function getGuardrailLine()
     {
-        $data = GuardrailLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GuardrailLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -256,7 +256,7 @@ class OutputController extends Controller
 
     public function getIRIPolygon()
     {
-        $data = IRIPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = IRIPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -268,7 +268,7 @@ class OutputController extends Controller
 
     public function getJalanLine()
     {
-        $data = JalanLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = JalanLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -280,7 +280,7 @@ class OutputController extends Controller
 
     public function getJembatanPoint()
     {
-        $data = JembatanPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = JembatanPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -292,7 +292,7 @@ class OutputController extends Controller
 
     public function getJembatanPolygon()
     {
-        $data = JembatanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = JembatanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -304,7 +304,7 @@ class OutputController extends Controller
 
     public function getLampuLalulintasPoint()
     {
-        $data = LampuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LampuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -316,7 +316,7 @@ class OutputController extends Controller
 
     public function getLapisPermukaanPolygon()
     {
-        $data = LapisPermukaanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPermukaanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -328,7 +328,7 @@ class OutputController extends Controller
 
     public function getLapisPondasiAtas1Polygon()
     {
-        $data = LapisPondasiAtas1Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPondasiAtas1Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -340,7 +340,7 @@ class OutputController extends Controller
 
     public function getLapisPondasiAtas2Polygon()
     {
-        $data = LapisPondasiAtas2Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPondasiAtas2Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -352,7 +352,7 @@ class OutputController extends Controller
 
     public function getLapisPondasiBawahPolygon()
     {
-        $data = LapisPondasiBawahPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPondasiBawahPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -364,7 +364,7 @@ class OutputController extends Controller
 
     public function getLHRPolygon()
     {
-        $data = LHRPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LHRPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -376,7 +376,7 @@ class OutputController extends Controller
 
     public function getListrikBawahtanahLine()
     {
-        $data = ListrikBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ListrikBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -388,7 +388,7 @@ class OutputController extends Controller
 
     public function getManholePoint()
     {
-        $data = ManholePoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ManholePoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -400,7 +400,7 @@ class OutputController extends Controller
 
     public function getMarkaLine()
     {
-        $data = MarkaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = MarkaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -412,7 +412,7 @@ class OutputController extends Controller
 
     public function getPagarOperasionalLine()
     {
-        $data = PagarOperasionalLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PagarOperasionalLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -424,7 +424,7 @@ class OutputController extends Controller
 
     public function getPatokHMPoint()
     {
-        $data = PatokHMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokHMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -436,7 +436,7 @@ class OutputController extends Controller
 
     public function getPatokKMPoint()
     {
-        $data = PatokKMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokKMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -448,7 +448,7 @@ class OutputController extends Controller
 
     public function getPatokLJPoint()
     {
-        $data = PatokLJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokLJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -460,7 +460,7 @@ class OutputController extends Controller
 
     public function getPatokPemanduPoint()
     {
-        $data = PatokPemanduPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokPemanduPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -472,7 +472,7 @@ class OutputController extends Controller
 
     public function getPatokRMJPoint()
     {
-        $data = PatokRMJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokRMJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -484,7 +484,7 @@ class OutputController extends Controller
 
     public function getPatokROWPoint()
     {
-        $data = PatokROWPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokROWPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -496,7 +496,7 @@ class OutputController extends Controller
 
     public function getPitaKejutLine()
     {
-        $data = PitaKejutLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PitaKejutLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -508,7 +508,7 @@ class OutputController extends Controller
 
     public function getRambuLalulintasPoint()
     {
-        $data = RambuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RambuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -520,7 +520,7 @@ class OutputController extends Controller
 
     public function getRambuPenunjukarahPoint()
     {
-        $data = RambuPenunjukarahPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RambuPenunjukarahPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -532,7 +532,7 @@ class OutputController extends Controller
 
     public function getReflektorPoint()
     {
-        $data = ReflektorPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ReflektorPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -544,7 +544,7 @@ class OutputController extends Controller
 
     public function getRiolLine()
     {
-        $data = RiolLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RiolLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -556,7 +556,7 @@ class OutputController extends Controller
 
     public function getRumahKabelPoint()
     {
-        $data = RumahKabelPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RumahKabelPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -568,7 +568,7 @@ class OutputController extends Controller
 
     public function getRuwasjaPolygon()
     {
-        $data = RuwasjaPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RuwasjaPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -580,7 +580,7 @@ class OutputController extends Controller
 
     public function getSaluranLine()
     {
-        $data = SaluranLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SaluranLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -592,7 +592,7 @@ class OutputController extends Controller
 
     public function getSegmenKonstruksiPolygon()
     {
-        $data = SegmenKonstruksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenKonstruksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -604,7 +604,7 @@ class OutputController extends Controller
 
     public function getSegmenLegerPolygon()
     {
-        $data = SegmenLegerPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenLegerPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -616,7 +616,7 @@ class OutputController extends Controller
 
     public function getSegmenPerlengkapanPolygon()
     {
-        $data = SegmenPerlengkapanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenPerlengkapanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -628,7 +628,7 @@ class OutputController extends Controller
 
     public function getSegmenSeksiPolygon()
     {
-        $data = SegmenSeksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenSeksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -640,7 +640,7 @@ class OutputController extends Controller
 
     public function getSegmenTolPolygon()
     {
-        $data = SegmenTolPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenTolPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -652,7 +652,7 @@ class OutputController extends Controller
 
     public function getStaTextPoint()
     {
-        $data = StaTextPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = StaTextPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -664,7 +664,7 @@ class OutputController extends Controller
 
     public function getSungaiLine()
     {
-        $data = SungaiLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SungaiLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -676,7 +676,7 @@ class OutputController extends Controller
 
     public function getTeleponBawahtanahLine()
     {
-        $data = TeleponBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = TeleponBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -688,7 +688,7 @@ class OutputController extends Controller
 
     public function getTiangListrikPoint()
     {
-        $data = TiangListrikPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = TiangListrikPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -700,7 +700,7 @@ class OutputController extends Controller
 
     public function getTiangTeleponPoint()
     {
-        $data = TiangTeleponPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = TiangTeleponPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -712,7 +712,7 @@ class OutputController extends Controller
 
     public function getVMSPoint()
     {
-        $data = VMSPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = VMSPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
