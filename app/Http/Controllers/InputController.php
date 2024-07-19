@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use App\Http\Resources\GeoJSONResource;
 
 use App\Models\JalanTol;
 use App\Models\Spatial\AdministratifPolygon;
@@ -29,7 +27,7 @@ use App\Models\Spatial\LapisPermukaanPolygon;
 use App\Models\Spatial\LapisPondasiAtas1Polygon;
 use App\Models\Spatial\LapisPondasiAtas2Polygon;
 use App\Models\Spatial\LapisPondasiBawahPolygon;
-use App\Models\Spatial\LHRPPolygon;
+use App\Models\Spatial\LHRPolygon;
 use App\Models\Spatial\ListrikBawahtanahLine;
 use App\Models\Spatial\ManholePoint;
 use App\Models\Spatial\MarkaLine;
