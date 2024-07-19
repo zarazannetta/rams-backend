@@ -15,7 +15,6 @@ class UserController extends Controller
     public function index() 
     {
         if (Auth::user()->role_id == 1) {
-            // List All User
             $users = User::all();
             return UserResource::collection($users);
         }
@@ -27,7 +26,6 @@ class UserController extends Controller
     public function show($id) 
     {
         if (Auth::user()->role_id == 1 || Auth::user()->id == $id) {
-            // Show Detail User
             $user = User::findOrFail($id);
             return new UserResource($user);
         }
@@ -47,7 +45,6 @@ class UserController extends Controller
         ]);
 
         if (Auth::user()->role_id == 1) {
-            // Preprocess
             $user_data = $request->all();
             if ($request->avatar) {
                 $filename = $this->generateRandomString();
@@ -58,7 +55,6 @@ class UserController extends Controller
             }
             $user_data['password'] = Hash::make($request->password);
 
-            // Create User
             User::create($user_data);
             return response()->json(['message' => 'User Created']);
         }
@@ -75,7 +71,6 @@ class UserController extends Controller
         ]);
 
         if (Auth::user()->role_id == 1 || Auth::user()->id == $id) {
-            // Preprocess
             $user_data = $request->all();
             if ($request->avatar) {
                 $filename = $this->generateRandomString();
@@ -88,7 +83,6 @@ class UserController extends Controller
                 $user_data['password'] = Hash::make($request->password);
             }
 
-            // Update User
             $user = User::findOrFail($id);
             $user->update(array_filter($user_data));
             return response()->json(['message' => 'User Updated']);
@@ -101,7 +95,6 @@ class UserController extends Controller
     public function destroy($id) 
     {
         if (Auth::user()->role_id == 1) {
-            // Delete User
             $user = User::findOrFail($id);
             Storage::delete('avatar/'.$user->avatar);
             $user->delete();
