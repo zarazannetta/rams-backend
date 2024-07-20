@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('panjang')->nullable();
             $table->string('lebar')->nullable();
             $table->string('luas')->nullable();
-            $table->double('absis_x')->nullable();
-            $table->double('ordinat_y')->nullable();
+            $table->string('absis_x')->nullable();
+            $table->string('ordinat_y')->nullable();
             $table->timestamps();
 
             $table->foreign('jalan_tol_id')->references('id')->on('jalan_tol');

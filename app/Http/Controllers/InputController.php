@@ -185,14 +185,14 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["txtmemo"].",
-                        ".$object["properties"]["kode_prov"].",
+                        '".$object["properties"]["txtmemo"]."',
+                        '".$object["properties"]["kode_prov"]."',
                         '".$object["properties"]["nama_prov"]."',
-                        ".$object["properties"]["kode_kab"].",
+                        '".$object["properties"]["kode_kab"]."',
                         '".$object["properties"]["nama_kab"]."',
-                        ".$object["properties"]["kode_kec"].",
+                        '".$object["properties"]["kode_kec"]."',
                         '".$object["properties"]["nama_kec"]."',
-                        ".$object["properties"]["kode_desa"].",
+                        '".$object["properties"]["kode_desa"]."',
                         '".$object["properties"]["nama_desa"]."',
                         '".$object["properties"]["tahun"]."',
                         '".now()."',
@@ -231,7 +231,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -271,10 +271,10 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jns_mtrial"].",
-                        ".$object["properties"]["ukrn_pnjng"].",
-                        ".$object["properties"]["kondisi"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jns_mtrial"]."',
+                        '".$object["properties"]["ukrn_pnjng"]."',
+                        '".$object["properties"]["kondisi"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -314,10 +314,10 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jns_mtrial"].",
-                        ".$object["properties"]["ukrn_pokok"].",
-                        ".$object["properties"]["kondisi"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jns_mtrial"]."',
+                        '".$object["properties"]["ukrn_pokok"]."',
+                        '".$object["properties"]["kondisi"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -354,7 +354,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -391,7 +391,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -441,20 +441,20 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["id_leger"].",
-                        ".$object["properties"]["sgmn_tol"].",
-                        ".$object["properties"]["nama"].",
-                        ".$object["properties"]["lebar_rmj"].",
-                        ".$object["properties"]["gradien_ki"].",
-                        ".$object["properties"]["gradien_ka"].",
-                        ".$object["properties"]["crs_fal_ki"].",
-                        ".$object["properties"]["crs_fal_ka"].",
-                        ".$object["properties"]["spr_elevsi"].",
-                        ".$object["properties"]["radius"].",
-                        ".$object["properties"]["terrain_ki"].",
-                        ".$object["properties"]["terrain_ka"].",
-                        ".$object["properties"]["ttgn_lh_ki"].",
-                        ".$object["properties"]["ttgn_lh_ka"].",
+                        '".$object["properties"]["id_leger"]."',
+                        '".$object["properties"]["sgmn_tol"]."',
+                        '".$object["properties"]["nama"]."',
+                        '".$object["properties"]["lebar_rmj"]."',
+                        '".$object["properties"]["gradien_ki"]."',
+                        '".$object["properties"]["gradien_ka"]."',
+                        '".$object["properties"]["crs_fal_ki"]."',
+                        '".$object["properties"]["crs_fal_ka"]."',
+                        '".$object["properties"]["spr_elevsi"]."',
+                        '".$object["properties"]["radius"]."',
+                        '".$object["properties"]["terrain_ki"]."',
+                        '".$object["properties"]["terrain_ka"]."',
+                        '".$object["properties"]["ttgn_lh_ki"]."',
+                        '".$object["properties"]["ttgn_lh_ka"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -491,7 +491,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -528,7 +528,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -569,11 +569,11 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jns_mtrial"].",
-                        ".$object["properties"]["ukrn_pnjng"].",
-                        ".$object["properties"]["kondisi"].",
-                        ".$object["properties"]["diameter"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jns_mtrial"]."',
+                        '".$object["properties"]["ukrn_pnjng"]."',
+                        '".$object["properties"]["kondisi"]."',
+                        '".$object["properties"]["diameter"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -610,7 +610,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -652,12 +652,12 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["jalur"].",
-                        ".$object["properties"]["bagian_jln"].",
-                        ".$object["properties"]["lebar"].",
-                        ".$object["properties"]["sgm_tol"].",
-                        ".$object["properties"]["km"].",
-                        ".$object["properties"]["nilai_iri"].",
+                        '".$object["properties"]["jalur"]."',
+                        '".$object["properties"]["bagian_jln"]."',
+                        '".$object["properties"]["lebar"]."',
+                        '".$object["properties"]["sgm_tol"]."',
+                        '".$object["properties"]["km"]."',
+                        '".$object["properties"]["nilai_iri"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -694,7 +694,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -737,13 +737,13 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["nama"].",
-                        ".$object["properties"]["km"].",
-                        ".$object["properties"]["panjang"].",
-                        ".$object["properties"]["lebar"].",
-                        ".$object["properties"]["luas"].",
-                        ".$object["properties"]["absis_x"].",
-                        ".$object["properties"]["ordinat_y"].",
+                        '".$object["properties"]["nama"]."',
+                        '".$object["properties"]["km"]."',
+                        '".$object["properties"]["panjang"]."',
+                        '".$object["properties"]["lebar"]."',
+                        '".$object["properties"]["luas"]."',
+                        '".$object["properties"]["absis_x"]."',
+                        '".$object["properties"]["ordinat_y"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -784,11 +784,11 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["nama"].",
-                        ".$object["properties"]["km"].",
-                        ".$object["properties"]["panjang"].",
-                        ".$object["properties"]["lebar"].",
-                        ".$object["properties"]["luas"].",
+                        '".$object["properties"]["nama"]."',
+                        '".$object["properties"]["km"]."',
+                        '".$object["properties"]["panjang"]."',
+                        '".$object["properties"]["lebar"]."',
+                        '".$object["properties"]["luas"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -826,8 +826,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["absis_x"].",
-                        ".$object["properties"]["ordinat_y"].",
+                        '".$object["properties"]["absis_x"]."',
+                        '".$object["properties"]["ordinat_y"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -865,8 +865,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["tebal"].",
-                        ".$object["properties"]["jenis"].",
+                        '".$object["properties"]["tebal"]."',
+                        '".$object["properties"]["jenis"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -904,8 +904,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["tebal"].",
-                        ".$object["properties"]["jenis"].",
+                        '".$object["properties"]["tebal"]."',
+                        '".$object["properties"]["jenis"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -943,8 +943,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["tebal"].",
-                        ".$object["properties"]["jenis"].",
+                        '".$object["properties"]["tebal"]."',
+                        '".$object["properties"]["jenis"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -982,8 +982,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["tebal"].",
-                        ".$object["properties"]["jenis"].",
+                        '".$object["properties"]["tebal"]."',
+                        '".$object["properties"]["jenis"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1026,13 +1026,13 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["sgm_tol"].",
-                        ".$object["properties"]["nama_sgmn"].",
-                        ".$object["properties"]["gol_i"].",
-                        ".$object["properties"]["gol_ii"].",
-                        ".$object["properties"]["gol_iii"].",
-                        ".$object["properties"]["gol_iv"].",
-                        ".$object["properties"]["gol_v"].",
+                        '".$object["properties"]["sgm_tol"]."',
+                        '".$object["properties"]["nama_sgmn"]."',
+                        '".$object["properties"]["gol_i"]."',
+                        '".$object["properties"]["gol_ii"]."',
+                        '".$object["properties"]["gol_iii"]."',
+                        '".$object["properties"]["gol_iv"]."',
+                        '".$object["properties"]["gol_v"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1069,7 +1069,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1109,10 +1109,10 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jns_mtrial"].",
-                        ".$object["properties"]["ukrn_pokok"].",
-                        ".$object["properties"]["kondisi"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jns_mtrial"]."',
+                        '".$object["properties"]["ukrn_pokok"]."',
+                        '".$object["properties"]["kondisi"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1149,7 +1149,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1187,8 +1187,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jenis"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jenis"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1226,8 +1226,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["km"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["km"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1265,8 +1265,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["km"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["km"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1305,9 +1305,9 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["keterangan"].",
-                        ".$object["properties"]["deskripsi"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["keterangan"]."',
+                        '".$object["properties"]["deskripsi"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1344,7 +1344,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1381,7 +1381,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1418,7 +1418,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1455,7 +1455,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1492,7 +1492,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1529,7 +1529,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1566,7 +1566,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1606,10 +1606,10 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jns_mtrial"].",
-                        ".$object["properties"]["ukrn_pokok"].",
-                        ".$object["properties"]["kondisi"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jns_mtrial"]."',
+                        '".$object["properties"]["ukrn_pokok"]."',
+                        '".$object["properties"]["kondisi"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1646,7 +1646,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1683,7 +1683,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["keterangan"].",
+                        '".$object["properties"]["keterangan"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1725,12 +1725,12 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
-                        ".$object["properties"]["jns_mtrial"].",
-                        ".$object["properties"]["kondisi"].",
-                        ".$object["properties"]["panjang"].",
-                        ".$object["properties"]["lebar"].",
-                        ".$object["properties"]["tinggi"].",
+                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["jns_mtrial"]."',
+                        '".$object["properties"]["kondisi"]."',
+                        '".$object["properties"]["panjang"]."',
+                        '".$object["properties"]["lebar"]."',
+                        '".$object["properties"]["tinggi"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1768,8 +1768,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["bagian_jln"].",
-                        ".$object["properties"]["lebar"].",
+                        '".$object["properties"]["bagian_jln"]."',
+                        '".$object["properties"]["lebar"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1807,8 +1807,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["id_leger"].",
-                        ".$object["properties"]["km"].",
+                        '".$object["properties"]["id_leger"]."',
+                        '".$object["properties"]["km"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1845,7 +1845,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["jalur"].",
+                        '".$object["properties"]["jalur"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1897,22 +1897,22 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["no_ruas"].",
-                        ".$object["properties"]["nama_ruas"].",
-                        ".$object["properties"]["seksi"].",
-                        ".$object["properties"]["keterangan"].",
-                        ".$object["properties"]["km_awal"].",
-                        ".$object["properties"]["km_akhir"].",
-                        ".$object["properties"]["sta_awal"].",
-                        ".$object["properties"]["sta_akhir"].",
-                        ".$object["properties"]["x_awal"].",
-                        ".$object["properties"]["x_akhir"].",
-                        ".$object["properties"]["y_awal"].",
-                        ".$object["properties"]["y_akhir"].",
-                        ".$object["properties"]["z_awal"].",
-                        ".$object["properties"]["z_akhir"].",
-                        ".$object["properties"]["dskrpsi_al"].",
-                        ".$object["properties"]["dskrpsi_ar"].",
+                        '".$object["properties"]["no_ruas"]."',
+                        '".$object["properties"]["nama_ruas"]."',
+                        '".$object["properties"]["seksi"]."',
+                        '".$object["properties"]["keterangan"]."',
+                        '".$object["properties"]["km_awal"]."',
+                        '".$object["properties"]["km_akhir"]."',
+                        '".$object["properties"]["sta_awal"]."',
+                        '".$object["properties"]["sta_akhir"]."',
+                        '".$object["properties"]["x_awal"]."',
+                        '".$object["properties"]["x_akhir"]."',
+                        '".$object["properties"]["y_awal"]."',
+                        '".$object["properties"]["y_akhir"]."',
+                        '".$object["properties"]["z_awal"]."',
+                        '".$object["properties"]["z_akhir"]."',
+                        '".$object["properties"]["dskrpsi_al"]."',
+                        '".$object["properties"]["dskrpsi_ar"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1950,8 +1950,8 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["sgm_tol"].",
-                        ".$object["properties"]["nama_sgmn"].",
+                        '".$object["properties"]["sgm_tol"]."',
+                        '".$object["properties"]["nama_sgmn"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -1988,7 +1988,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -2025,7 +2025,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -2062,7 +2062,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -2099,7 +2099,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -2136,7 +2136,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
@@ -2173,7 +2173,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        ".$object["properties"]["layer"].",
+                        '".$object["properties"]["layer"]."',
                         '".now()."',
                         '".now()."'
                     )
