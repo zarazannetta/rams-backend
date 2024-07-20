@@ -100,7 +100,7 @@ class OutputController extends Controller
             'reflektor_point' => 'getReflektorPoint',
             'riol_line' => 'getRiolLine',
             'rumah_kabel_point' => 'getRumahKabelPoint',
-            'ruwasja_polygon' => 'getRuwasjaPoint',
+            'ruwasja_polygon' => 'getRuwasjaPolygon',
             'saluran_line' => 'getSaluranLine',
             'segmen_konstruksi_polygon' => 'getSegmenKonstruksiPolygon',
             'segmen_leger_polygon' => 'getSegmenLegerPolygon',
