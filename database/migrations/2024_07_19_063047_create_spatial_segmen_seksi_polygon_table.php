@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_segmen_seksi_polygon', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPolygonZ('geom');
             $table->string('no_ruas')->nullable();
             $table->string('nama_ruas')->nullable();
             $table->string('seksi')->nullable();

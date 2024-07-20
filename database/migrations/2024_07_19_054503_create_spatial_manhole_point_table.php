@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_manhole_point', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPoint('geom');
+            $table->point('geom');
             $table->string('layer')->nullable();
             $table->string('jenis_material')->nullable();
             $table->string('ukuran_pokok')->nullable();

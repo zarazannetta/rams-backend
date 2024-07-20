@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_lhr_polygon', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPolygonZ('geom');
             $table->string('segmen_tol')->nullable();
             $table->string('nama_segmen')->nullable();
             $table->string('gol_i')->nullable();

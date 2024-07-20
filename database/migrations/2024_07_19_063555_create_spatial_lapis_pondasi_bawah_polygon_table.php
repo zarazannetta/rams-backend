@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_lapis_pondasi_bawah_polygon', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPolygonZ('geom');
             $table->string('tebal')->nullable();
             $table->string('jenis')->nullable();
             $table->timestamps();

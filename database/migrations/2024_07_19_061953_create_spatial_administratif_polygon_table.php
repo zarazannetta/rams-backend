@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_administratif_polygon', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->multiPolygon('geom');
+            $table->multiPolygonZ('geom');
             $table->string('txtmemo')->nullable();
             $table->string('kode_prov')->nullable();
             $table->string('nama_prov')->nullable();
