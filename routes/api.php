@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\InputController;
 use App\Http\Controllers\OutputController;
+use App\Http\Controllers\RefferenceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,8 +33,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Input Aset
-    Route::get('data/list-ruas', [InputController::class, 'getRuasList']);
-    Route::get('data/tipe-aset', [InputController::class, 'getTipeAsetList']);
+    Route::get('data/list-ruas', [RefferenceController::class, 'getRuasList']);
+    Route::get('data/tipe-aset', [RefferenceController::class, 'getTipeAsetList']);
     Route::post('data/input-ruas', [InputController::class, 'inputRuas']);
     Route::post('data/input-aset', [InputController::class, 'inputAset']);
 });
