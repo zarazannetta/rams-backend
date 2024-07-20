@@ -17,7 +17,6 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -25,7 +24,6 @@ class AuthController extends Controller
                 'email' => ['The provided credentials are Incorrect.'],
             ]);
         }
-
         $token = $user->createToken('User Logged In')->plainTextToken;
 
         return response()->json([

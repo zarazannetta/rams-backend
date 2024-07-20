@@ -32,6 +32,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Input Aset
+    Route::get('data/list-ruas', [InputController::class, 'getRuasList']);
+    Route::get('data/tipe-aset', [InputController::class, 'getTipeAsetList']);
     Route::post('data/input-ruas', [InputController::class, 'inputRuas']);
     Route::post('data/input-aset', [InputController::class, 'inputAset']);
 });
