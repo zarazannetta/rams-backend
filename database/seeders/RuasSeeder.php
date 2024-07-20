@@ -12,6 +12,7 @@ class RuasSeeder extends Seeder
     {
         JalanTol::create(
             [
+                'user_id' => 1,
                 'nama' => 'Bakauheni - Terbanggi Besar',
                 'kode' => 'BHTB01',
                 'tahun' => '2019',
