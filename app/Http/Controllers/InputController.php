@@ -1981,14 +1981,14 @@ class InputController extends Controller
                     INTO spatial_sta_text_point (
                         jalan_tol_id, 
                         geom, 
-                        layer,
+                        sta,
                         created_at, 
                         updated_at
                     )
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        '".$object["properties"]["layer"]."',
+                        '".$object["properties"]["sta"]."',
                         '".now()."',
                         '".now()."'
                     )

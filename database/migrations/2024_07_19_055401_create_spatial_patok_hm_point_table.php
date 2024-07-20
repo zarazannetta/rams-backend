@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spatial_patok_hm_point', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('jalan_tol_id');
-            $table->point('geom');
+            $table->pointZ('geom');
             $table->string('layer')->nullable();
             $table->string('km')->nullable();
             $table->timestamps();
