@@ -27,10 +27,10 @@ class LegerController extends Controller
                                 'dataJalanGeometrik',
                                 'dataJalanLingkungan',
                                 'dataJalanLainnya',
-                                'kodeProvinsi', 
-                                'kodeKabkot', 
-                                'kodeKecamatan', 
-                                'kodeDesa'
+                                'dataJalanIdentifikasi.kodeProvinsi', 
+                                'dataJalanIdentifikasi.kodeKabkot', 
+                                'dataJalanIdentifikasi.kodeKecamatan', 
+                                'dataJalanIdentifikasi.kodeDesa'
                             )
                             ->where('kode_leger', $kode_leger)->first();
         return response()->json($leger_jalan);
