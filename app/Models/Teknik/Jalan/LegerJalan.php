@@ -55,7 +55,7 @@ class LegerJalan extends Model
 
     public function dataJalanTeknik2BahuJalan()
     {
-        return $this->belongsTo(DataJalanTeknik2BahuJalan::class, 'data_jalan_teknik2_bahujalan_id');
+        return $this->belongsTo(DataJalanTeknik2Bahujalan::class, 'data_jalan_teknik2_bahujalan_id');
     }
 
     public function dataJalanTeknik3Goronggorong()
