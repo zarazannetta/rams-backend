@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Teknik;
+namespace App\Models\Teknik\Jalan;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -44,21 +44,21 @@ class DataJalanIdentifikasi extends Model
 
     public function kodeProvinsi()
     {
-        return $this->belongsTo(KodeProvinsi::class, 'kode_provinsi_id');
+        return $this->belongsTo(\App\Models\Teknik\KodeProvinsi::class, 'kode_provinsi_id');
     }
 
     public function kodeKabkot()
     {
-        return $this->belongsTo(KodeKabkot::class, 'kode_kabkot_id');
+        return $this->belongsTo(\App\Models\Teknik\KodeKabkot::class, 'kode_kabkot_id');
     }
 
     public function kodeKecamatan()
     {
-        return $this->belongsTo(KodeKecamatan::class, 'kode_kecamatan_id');
+        return $this->belongsTo(\App\Models\Teknik\KodeKecamatan::class, 'kode_kecamatan_id');
     }
 
     public function kodeDesakel()
     {
-        return $this->belongsTo(KodeDesakel::class, 'kode_desakel_id');
+        return $this->belongsTo(\App\Models\Teknik\KodeDesakel::class, 'kode_desakel_id');
     }
 }

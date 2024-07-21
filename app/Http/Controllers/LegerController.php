@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\JalanTol;
 use App\Models\Leger;
-use App\Models\Teknik\LegerJalan;
+use App\Models\Teknik\Jalan\LegerJalan;
+use App\Models\Teknik\Jembatan\LegerJembatan;
 
 class LegerController extends Controller
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models\Teknik;
+namespace App\Models\Teknik\Jembatan;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DataJalanLingkungan extends Model
+class DataJembatanUmumUraian extends Model
 {
-    protected $table = 'data_jalan_lingkungan';
+    protected $table = 'data_jembatan_umum_uraian';
 
     protected $fillable = [
         'tahun',

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Teknik;
+namespace App\Models\Teknik\Jalan;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,6 +28,6 @@ class DataJalanTeknik3Saluran extends Model
 
     public function jenisSaluran()
     {
-        return $this->belongsTo(JenisSaluran::class, 'jenis_saluran_id');
+        return $this->belongsTo(\App\Models\Teknik\JenisSaluran::class, 'jenis_saluran_id');
     }
 }

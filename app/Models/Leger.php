@@ -17,11 +17,11 @@ class Leger extends Model
 
     public function jalanTol()
     {
-        return $this->belongsTo(\App\Models\JalanTol::class, 'jalan_tol_id');
+        return $this->belongsTo(JalanTol::class, 'jalan_tol_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

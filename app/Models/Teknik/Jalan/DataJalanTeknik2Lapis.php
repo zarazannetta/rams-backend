@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Teknik;
+namespace App\Models\Teknik\Jalan;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +24,6 @@ class DataJalanTeknik2Lapis extends Model
 
     public function jenisLapis()
     {
-        return $this->belongsTo(JenisLapis::class, 'jenis_lapis_id');
+        return $this->belongsTo(\App\Models\Teknik\JenisLapis::class, 'jenis_lapis_id');
     }
 }
