@@ -1810,7 +1810,7 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        '".$id_leger."',
+                        '".$kode_leger."',
                         '".$object["properties"]["km"]."',
                         '".now()."',
                         '".now()."'
