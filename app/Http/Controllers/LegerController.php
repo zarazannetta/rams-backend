@@ -5,21 +5,19 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
-use App\Models\JalanTol;
-use App\Models\Leger;
 use App\Models\Teknik\Jalan\LegerJalan;
-use App\Models\Teknik\Jembatan\LegerJembatan;
 
 class LegerController extends Controller
 {
+    public function getData($kode_leger)
+    {
+        $leger_jalan = LegerJalan::where('kode_leger', $kode_leger)->first();
+        return response()->json($leger_jalan);
+    }
+
     public function generate(Request $request)
     {
-        $user = Auth::user()->id;
-        $leger_identifikasi = $request->leger_identifikasi_id;
-        $jenis_leger = $request->jenis_leger;
-        $detail_data = $request->detail_data;
-
-        // return response()->json($data);
+        $data = null;
+        return response()->json($data);
     }
 }

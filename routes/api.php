@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     // Leger
     Route::post('leger/generate', [LegerController::class, 'generate']);
+    Route::post('leger/get-data/{kode_leger}', [LegerController::class, 'getData']);
 });
 
 // Output Aset
