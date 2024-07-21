@@ -11,7 +11,8 @@ class LegerController extends Controller
 {
     public function getData($kode_leger)
     {
-        $leger_jalan = LegerJalan::where('kode_leger', $kode_leger)->first();
+        $leger_jalan = LegerJalan::with('dataJalanIdentifikasi')
+                            ->where('kode_leger', $kode_leger)->first();
         return response()->json($leger_jalan);
     }
 
