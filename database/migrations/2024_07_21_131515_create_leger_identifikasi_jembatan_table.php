@@ -39,10 +39,10 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('jalan_tol_id')->references('id')->on('jalan_tol');
-            $table->foreign('kode_provinsi_id')->references('id')->on('kode_provinsi');
-            $table->foreign('kode_kabkot_id')->references('id')->on('kode_kabkot');
-            $table->foreign('kode_kecamatan_id')->references('id')->on('kode_kecamatan');
-            $table->foreign('kode_desakel_id')->references('id')->on('kode_desakel');
+            $table->foreign('kode_provinsi_id')->references('id')->on('reff_kode_provinsi');
+            $table->foreign('kode_kabkot_id')->references('id')->on('reff_kode_kabkot');
+            $table->foreign('kode_kecamatan_id')->references('id')->on('reff_kode_kecamatan');
+            $table->foreign('kode_desakel_id')->references('id')->on('reff_kode_desakel');
         });
     }
 
