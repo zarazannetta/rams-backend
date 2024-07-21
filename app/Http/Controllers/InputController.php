@@ -6,7 +6,8 @@ use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\JalanTol;
-use App\Models\Teknik\LegerDetail;
+use App\Models\Leger;
+use App\Models\Teknik\LegerJalan;
 
 use App\Models\Spatial\AdministratifPolygon;
 use App\Models\Spatial\BatasDesaLine;
@@ -1796,7 +1797,7 @@ class InputController extends Controller
             $geojson = file_get_contents(public_path('temp/'.$filename));
             $objects = json_decode($geojson, true);
             foreach ($objects['features'] as $object)  {
-                $id_leger = $object["properties"]["id_leger"];
+                $kode_leger = $object["properties"]["id_leger"];
                 DB::statement("INSERT 
                     INTO spatial_segmen_leger_polygon (
                         jalan_tol_id, 
@@ -1816,8 +1817,8 @@ class InputController extends Controller
                     )
                 ");
                 
-                $kode_leger = substr($id_leger, 0, 1);
-                switch ($kode_leger) {
+                $initial_leger = substr($kode_leger, 0, 1);
+                switch ($initial_leger) {
                     case 'M':
                         $jenis_leger = 'Mainroad';
                         break;
@@ -1828,13 +1829,17 @@ class InputController extends Controller
                         $jenis_leger = 'Akses';
                         break;
                 }
-                $existingLeger = LegerDetail::where('leger_id', $id_leger)->first();
+                $existingLeger = LegerJalan::where('kode_leger', $kode_leger)->first();
                 if (!$existingLeger) {
-                    LegerDetail::create([
+                    $leger = Leger::create([
                         'jalan_tol_id' => $jalan_tol_id,
                         'user_id' => Auth::user()->id,
-                        'leger_id' => $id_leger,
+                        'kode_leger' => $kode_leger,
                         'jenis_leger' => $jenis_leger,
+                    ]);
+                    LegerJalan::create([
+                        'leger_id' => $leger->id,
+                        'kode_leger' => $kode_leger,
                     ]);
                 }
             }

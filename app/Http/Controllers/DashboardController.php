@@ -6,7 +6,7 @@ use Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\JalanTol;
-use App\Models\Teknik\LegerDetail;
+use App\Models\Leger;
 use App\Models\Spatial\LHRPolygon;
 use App\Models\Spatial\IRIPolygon;
 
@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $total_ruas = JalanTol::count();
         $jumlah_user = User::count();
         $jumlah_ruas_user = JalanTol::where('user_id', Auth::user()->id)->count();
-        $jumlah_leger_user = LegerDetail::where('user_id', Auth::user()->id)->count();
+        $jumlah_leger_user = Leger::where('user_id', Auth::user()->id)->count();
 
         // LHR
         $lhr = LHRPolygon::whereRelation('jalanTol', 'user_id', Auth::user()->id)->get();

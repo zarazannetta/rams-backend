@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\JalanTol;
-use App\Models\Teknik\LegerDetail;
+use App\Models\Leger;
+use App\Models\Teknik\LegerJalan;
 
 class LegerController extends Controller
 {
