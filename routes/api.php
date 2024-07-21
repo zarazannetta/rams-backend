@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InputController;
 use App\Http\Controllers\OutputController;
+use App\Http\Controllers\LegerController;
 use App\Http\Controllers\RefferenceController;
 
 /*
@@ -41,6 +42,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('data/tipe-aset', [RefferenceController::class, 'getTipeAsetList']);
     Route::post('data/input-ruas', [InputController::class, 'inputRuas']);
     Route::post('data/input-aset', [InputController::class, 'inputAset']);
+
+    // Leger
+    Route::post('leger/generate', [LegerController::class, 'generate']);
 });
 
 // Output Aset
