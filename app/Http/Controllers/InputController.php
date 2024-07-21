@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 use App\Models\JalanTol;
+use App\Models\Teknik\LegerDetail;
+
 use App\Models\Spatial\AdministratifPolygon;
 use App\Models\Spatial\BatasDesaLine;
 use App\Models\Spatial\BoxCulvertLine;
@@ -1795,6 +1796,7 @@ class InputController extends Controller
             $geojson = file_get_contents(public_path('temp/'.$filename));
             $objects = json_decode($geojson, true);
             foreach ($objects['features'] as $object)  {
+                $id_leger = $object["properties"]["id_leger"];
                 DB::statement("INSERT 
                     INTO spatial_segmen_leger_polygon (
                         jalan_tol_id, 
@@ -1807,12 +1809,34 @@ class InputController extends Controller
                     VALUES (
                         ".$jalan_tol_id.", 
                         ST_GeomFromGeoJSON('".json_encode($object["geometry"])."'), 
-                        '".$object["properties"]["id_leger"]."',
+                        '".$id_leger."',
                         '".$object["properties"]["km"]."',
                         '".now()."',
                         '".now()."'
                     )
                 ");
+                
+                $kode_leger = substr($id_leger, 0, 1);
+                switch ($kode_leger) {
+                    case 'M':
+                        $jenis_leger = 'Mainroad';
+                        break;
+                    case 'R':
+                        $jenis_leger = 'Ramp';
+                        break;
+                    case 'A':
+                        $jenis_leger = 'Akses';
+                        break;
+                }
+                $existingLeger = LegerDetail::where('leger_id', $id_leger)->first();
+                if (!$existingLeger) {
+                    LegerDetail::create([
+                        'jalan_tol_id' => $jalan_tol_id,
+                        'user_id' => Auth::user()->id,
+                        'leger_id' => $id_leger,
+                        'jenis_leger' => $jenis_leger,
+                    ]);
+                }
             }
             unlink(public_path('temp/'.$filename));
             return response()->json(['message' => 'Success']);

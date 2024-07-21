@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leger_identifikasi_jembatan', function (Blueprint $table) {
+        Schema::create('data_jalan_identifikasi', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('jalan_tol_id');
-            $table->string('leger_id');
             $table->unsignedBigInteger('kode_provinsi_id');
             $table->unsignedBigInteger('kode_kabkot_id');
             $table->unsignedBigInteger('kode_kecamatan_id');
@@ -22,23 +20,32 @@ return new class extends Migration
             $table->integer('nomor_ruas')->nullable();
             $table->integer('nomor_seksi')->nullable();
             $table->string('deskripsi_seksi')->nullable();
-            $table->string('nama_ruas')->nullable();
-            $table->string('nama_jembatan')->nullable();
-            $table->string('panjang_jembatan')->nullable();
-            $table->string('luas_jembatan')->nullable();
-            $table->string('kelas_jembatan')->nullable();
             $table->string('lokasi')->nullable();
             $table->string('titik_ikat_leger_kode')->nullable();
             $table->string('titik_ikat_leger_x')->nullable();
             $table->string('titik_ikat_leger_y')->nullable();
             $table->string('titik_ikat_leger_z')->nullable();
             $table->string('titik_ikat_leger_deskripsi')->nullable();
-            $table->string('tanggal_selesai_bangun')->nullable();
-            $table->string('tanggal_dibuka')->nullable();
-            $table->string('tanggal_ditutup')->nullable();
+            $table->string('titik_ikat_patok_kode')->nullable();
+            $table->string('titik_ikat_patok_km')->nullable();
+            $table->string('titik_ikat_patok_x')->nullable();
+            $table->string('titik_ikat_patok_y')->nullable();
+            $table->string('titik_ikat_patok_z')->nullable();
+            $table->string('titik_ikat_patok_deskripsi')->nullable();
+            $table->string('titik_awal_segmen_kode')->nullable();
+            $table->string('titik_awal_segmen_km')->nullable();
+            $table->string('titik_awal_segmen_x')->nullable();
+            $table->string('titik_awal_segmen_y')->nullable();
+            $table->string('titik_awal_segmen_z')->nullable();
+            $table->string('titik_awal_segmen_deskripsi')->nullable();
+            $table->string('titik_akhir_segmen_kode')->nullable();
+            $table->string('titik_akhir_segmen_km')->nullable();
+            $table->string('titik_akhir_segmen_x')->nullable();
+            $table->string('titik_akhir_segmen_y')->nullable();
+            $table->string('titik_akhir_segmen_z')->nullable();
+            $table->string('titik_akhir_segmen_deskripsi')->nullable();
             $table->timestamps();
 
-            $table->foreign('jalan_tol_id')->references('id')->on('jalan_tol');
             $table->foreign('kode_provinsi_id')->references('id')->on('reff_kode_provinsi');
             $table->foreign('kode_kabkot_id')->references('id')->on('reff_kode_kabkot');
             $table->foreign('kode_kecamatan_id')->references('id')->on('reff_kode_kecamatan');
@@ -51,6 +58,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leger_identifikasi_jembatan');
+        Schema::dropIfExists('data_jalan_identifikasi');
     }
 };

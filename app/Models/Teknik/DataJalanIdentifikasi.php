@@ -4,13 +4,11 @@ namespace App\Models\Teknik;
 
 use Illuminate\Database\Eloquent\Model;
 
-class LegerJalan extends Model
+class DataJalanIdentifikasi extends Model
 {
-    protected $table = 'leger_identifikasi_jalan';
+    protected $table = 'data_jalan_identifikasi';
 
     protected $fillable = [
-        'jalan_tol_id',
-        'leger_id',
         'kode_provinsi_id',
         'kode_kabkot_id',
         'kode_kecamatan_id',
@@ -44,8 +42,23 @@ class LegerJalan extends Model
         'titik_akhir_segmen_deskripsi',
     ];
 
-    public function jalanTol()
+    public function kodeProvinsi()
     {
-        return $this->belongsTo(\App\Models\JalanTol::class, 'jalan_tol_id');
+        return $this->belongsTo(KodeProvinsi::class, 'kode_provinsi_id');
+    }
+
+    public function kodeKabkot()
+    {
+        return $this->belongsTo(KodeKabkot::class, 'kode_kabkot_id');
+    }
+
+    public function kodeKecamatan()
+    {
+        return $this->belongsTo(KodeKecamatan::class, 'kode_kecamatan_id');
+    }
+
+    public function kodeDesakel()
+    {
+        return $this->belongsTo(KodeDesakel::class, 'kode_desakel_id');
     }
 }
