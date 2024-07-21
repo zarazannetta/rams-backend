@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('leger_detail_data', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('leger_identifikasi_id');
             $table->unsignedBigInteger('detail_data_id');
             $table->string('jenis_leger');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

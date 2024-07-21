@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InputController;
 use App\Http\Controllers\OutputController;
 use App\Http\Controllers\RefferenceController;
@@ -31,6 +32,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // Auth
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'getDashboardData']);
 
     // Input Aset
     Route::get('data/list-ruas', [RefferenceController::class, 'getRuasList']);
