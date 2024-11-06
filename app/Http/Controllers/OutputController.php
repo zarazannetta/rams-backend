@@ -5,62 +5,66 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use App\Http\Resources\GeoJSONResource;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\JalanTol;
-use App\Models\Spatial\AdministratifPolygon;
-use App\Models\Spatial\BatasDesaLine;
-use App\Models\Spatial\BoxCulvertLine;
-use App\Models\Spatial\BPTLine;
-use App\Models\Spatial\BronjongLine;
-use App\Models\Spatial\ConcreteBarrierLine;
-use App\Models\Spatial\DataGeometrikJalanPolygon;
-use App\Models\Spatial\GerbangLine;
-use App\Models\Spatial\GerbangPoint;
-use App\Models\Spatial\GorongGorongLine;
-use App\Models\Spatial\GuardrailLine;
-use App\Models\Spatial\IRIPolygon;
-use App\Models\Spatial\JalanLine;
-use App\Models\Spatial\JembatanPoint;
-use App\Models\Spatial\JembatanPolygon;
-use App\Models\Spatial\LampuLalulintasPoint;
-use App\Models\Spatial\LapisPermukaanPolygon;
-use App\Models\Spatial\LapisPondasiAtas1Polygon;
-use App\Models\Spatial\LapisPondasiAtas2Polygon;
-use App\Models\Spatial\LapisPondasiBawahPolygon;
-use App\Models\Spatial\LHRPolygon;
-use App\Models\Spatial\ListrikBawahtanahLine;
-use App\Models\Spatial\ManholePoint;
-use App\Models\Spatial\MarkaLine;
-use App\Models\Spatial\PagarOperasionalLine;
-use App\Models\Spatial\PatokHMPoint;
-use App\Models\Spatial\PatokKMPoint;
-use App\Models\Spatial\PatokLJPoint;
-use App\Models\Spatial\PatokPemanduPoint;
-use App\Models\Spatial\PatokRMJPoint;
-use App\Models\Spatial\PatokROWPoint;
-use App\Models\Spatial\PitaKejutLine;
-use App\Models\Spatial\RambuLalulintasPoint;
-use App\Models\Spatial\RambuPenunjukarahPoint;
-use App\Models\Spatial\ReflektorPoint;
-use App\Models\Spatial\RiolLine;
-use App\Models\Spatial\RumahKabelPoint;
-use App\Models\Spatial\RuwasjaPolygon;
-use App\Models\Spatial\SaluranLine;
-use App\Models\Spatial\SegmenKonstruksiPolygon;
-use App\Models\Spatial\SegmenLegerPolygon;
-use App\Models\Spatial\SegmenPerlengkapanPolygon;
-use App\Models\Spatial\SegmenSeksiPolygon;
-use App\Models\Spatial\SegmenTolPolygon;
-use App\Models\Spatial\StaTextPoint;
-use App\Models\Spatial\SungaiLine;
-use App\Models\Spatial\TeleponBawahtanahLine;
-use App\Models\Spatial\TiangListrikPoint;
-use App\Models\Spatial\TiangTeleponPoint;
-use App\Models\Spatial\VMSPoint;
+use App\Models\Spatial\{
+    AdministratifPolygon,
+    BatasDesaLine,
+    BoxCulvertLine,
+    BPTLine,
+    BronjongLine,
+    ConcreteBarrierLine,
+    DataGeometrikJalanPolygon,
+    GerbangLine,
+    GerbangPoint,
+    GorongGorongLine,
+    GuardRailLine,
+    IRIPolygon,
+    JalanLine,
+    JembatanPoint,
+    JembatanPolygon,
+    LampuLalulintasPoint,
+    LapisPermukaanPolygon,
+    LapisPondasiAtas1Polygon,
+    LapisPondasiAtas2Polygon,
+    LapisPondasiBawahPolygon,
+    LHRPolygon,
+    ListrikBawahtanahLine,
+    ManholePoint,
+    MarkaLine,
+    PagarOperasionalLine,
+    PatokHMPoint,
+    PatokKMPoint,
+    PatokLJPoint,
+    PatokPemanduPoint,
+    PatokRMJPoint,
+    PatokROWPoint,
+    PitaKejutLine,
+    RambuLalulintasPoint,
+    RambuPenunjukarahPoint,
+    ReflektorPoint,
+    RiolLine,
+    RumahKabelPoint,
+    RuwasjaPolygon,
+    SaluranLine,
+    SegmenKonstruksiPolygon,
+    SegmenLegerPolygon,
+    SegmenPerlengkapanPolygon,
+    SegmenSeksiPolygon,
+    SegmenTolPolygon,
+    StaTextPoint,
+    SungaiLine,
+    TeleponBawahtanahLine,
+    TiangListrikPoint,
+    TiangTeleponPoint,
+    VMSPoint
+};
 
 class OutputController extends Controller
 {
-    public function getAset($type)
+    public function getAset($type, Request $request)
     {
         $getFunctions = [
             'administratif_polygon' => 'getAdministratifPolygon',
@@ -116,21 +120,123 @@ class OutputController extends Controller
         ];
 
         if (array_key_exists($type, $getFunctions)) {
-            return $this->{$getFunctions[$type]}();
+            return $this->{$getFunctions[$type]}($request->query('start_km'), $request->query('end_km'));
         } else {
             abort(404, 'Tipe Aset tidak ditemukan');
         }
     }
 
-    public function getAdministratifPolygon()
+    public function getAdministratifPolygon($start_km = null, $end_km = null)
     {
-        $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        // $startPoint = DB::table('spatial_patok_km_point')
+        //     ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
+        //     ->where('km', 'LIKE', '%' . $start_km . '%')
+        //     ->first();
+
+        // $endPoint = DB::table('spatial_patok_km_point')
+        //     ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
+        //     ->where('km', 'LIKE', '%' . $end_km . '%')
+        //     ->first();
+
+        // Normalize km format by removing '+' and any spaces
+        $start_km = $start_km ? str_replace(['+', ' '], '', $start_km) : null;
+        $end_km = $end_km ? str_replace(['+', ' '], '', $end_km) : null;
+
+        // Query start point and end point
+        $startPoint = DB::table('spatial_patok_km_point')
+            ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
+            ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$start_km])
+            ->first();
+
+        $endPoint = DB::table('spatial_patok_km_point')
+            ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
+            ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$end_km])
+            ->first();
+            
+        if ($start_km && $end_km !== null) {
+            if (!$startPoint || !$endPoint) {
+                return response()->json([
+                    'error' => 'Start or end km point not found',
+                    'missing' => [
+                        'start_km' => !$startPoint ? $start_km : null,
+                        'end_km' => !$endPoint ? $end_km : null,
+                    ]], 404);
+            } else {
+                $data = DB::select("
+                    WITH original_points AS (
+                        SELECT 
+                            ST_SetSRID(ST_MakePoint(:x1, :y1), 4326) AS geom1,
+                            ST_SetSRID(ST_MakePoint(:x2, :y2), 4326) AS geom2
+                    ),
+                    projected_points AS (
+                        SELECT 
+                            ST_Project(geom1::geography, 1000, radians(270))::geometry AS point_kiri1,
+                            ST_Project(geom1::geography, 1000, radians(90))::geometry AS point_kanan1,
+                            ST_Project(geom2::geography, 1000, radians(270))::geometry AS point_kiri2,
+                            ST_Project(geom2::geography, 1000, radians(90))::geometry AS point_kanan2
+                        FROM original_points
+                    ),
+                    bounding_box AS (
+                        SELECT 
+                            ST_SetSRID(
+                                ST_MakePolygon(
+                                    ST_MakeLine(
+                                        ARRAY[
+                                            (SELECT point_kiri1 FROM projected_points),
+                                            (SELECT point_kanan1 FROM projected_points),
+                                            (SELECT point_kanan2 FROM projected_points),
+                                            (SELECT point_kiri2 FROM projected_points),
+                                            (SELECT point_kiri1 FROM projected_points)
+                                        ]
+                                    )
+                                ), 4326
+                            ) AS geom
+                    )
+                    
+                    SELECT 
+                        ST_AsGeoJSON(ST_Intersection(bb.geom, ap.geom::geometry)) AS geojson
+                    FROM 
+                        bounding_box bb
+                    JOIN 
+                        spatial_administratif_polygon ap ON ST_Intersects(bb.geom, ap.geom::geometry);
+                ", [
+                    'x1' => $startPoint->x,
+                    'y1' => $startPoint->y,
+                    'x2' => $endPoint->x,
+                    'y2' => $endPoint->y,
+                ]
+            );
+
+                $features = array_map(function ($item) {
+                    return [
+                        'type' => 'Feature',
+                        'geometry' => json_decode($item->geojson),
+                        'properties' => new \stdClass(),
+                    ];
+                }, $data);
+
+                $featureCollection = [
+                    "type" => "FeatureCollection",
+                    "features" => $features,
+                ];
+
+                return response()->json($featureCollection);
+            }
+
+        }
+
+    // Default return if no start or end km
+        $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")
+            ->get()
+            ->makeHidden('geom');
+        
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
             "type" => "FeatureCollection",
             "features" => $features,
         ];
+
         return response()->json($featureCollection);
     }
 
