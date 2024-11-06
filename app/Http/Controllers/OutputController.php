@@ -126,6 +126,87 @@ class OutputController extends Controller
         }
     }
 
+    private function getPointFromKM($km)
+    {
+        $km = $km ? str_replace(['+', ' '], '', $km) : null;
+
+        if ($km === null) {
+            return null;
+        }
+
+        return DB::table('spatial_patok_km_point')
+            ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
+            ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$km])
+            ->first();
+    }
+    private function getBoundingBoxData($table, $startPoint, $endPoint)
+    {
+        if (!$startPoint || !$endPoint) {
+            return response()->json([
+                'error' => 'Start or end km point not found',
+                'missing' => [
+                    'start_km' => !$startPoint ? 'Missing start_km' : null,
+                    'end_km' => !$endPoint ? 'Missing end_km' : null,
+                ]
+            ], 404);
+        }
+
+        $data = DB::select("
+            WITH original_points AS (
+                SELECT 
+                    ST_SetSRID(ST_MakePoint(:x1, :y1), 4326) AS geom1,
+                    ST_SetSRID(ST_MakePoint(:x2, :y2), 4326) AS geom2
+            ),
+            projected_points AS (
+                SELECT 
+                    ST_Project(geom1::geography, 1000, radians(270))::geometry AS point_kiri1,
+                    ST_Project(geom1::geography, 1000, radians(90))::geometry AS point_kanan1,
+                    ST_Project(geom2::geography, 1000, radians(270))::geometry AS point_kiri2,
+                    ST_Project(geom2::geography, 1000, radians(90))::geometry AS point_kanan2
+                FROM original_points
+            ),
+            bounding_box AS (
+                SELECT 
+                    ST_SetSRID(
+                        ST_MakePolygon(
+                            ST_MakeLine(
+                                ARRAY[
+                                    (SELECT point_kiri1 FROM projected_points),
+                                    (SELECT point_kanan1 FROM projected_points),
+                                    (SELECT point_kanan2 FROM projected_points),
+                                    (SELECT point_kiri2 FROM projected_points),
+                                    (SELECT point_kiri1 FROM projected_points)
+                                ]
+                            )
+                        ), 4326
+                    ) AS geom
+            )
+            SELECT
+                ST_AsGeoJSON(ST_Intersection(bb.geom, tb.geom::geometry)) AS geojson
+            FROM
+                bounding_box bb
+            JOIN
+                {$table} tb ON ST_Intersects(bb.geom, tb.geom::geometry);
+        ", [
+            'x1' => $startPoint->x,
+            'y1' => $startPoint->y,
+            'x2' => $endPoint->x,
+            'y2' => $endPoint->y,
+        ]);
+
+        $features = array_map(function ($item) {
+            return [
+                'type' => 'Feature',
+                'geometry' => json_decode($item->geojson),
+                'properties' => new \stdClass(),
+            ];
+        }, $data);
+
+        return [
+            "type" => "FeatureCollection",
+            "features" => $features,
+        ];
+    }
     public function getAdministratifPolygon($start_km = null, $end_km = null)
     {
         // $startPoint = DB::table('spatial_patok_km_point')
@@ -152,7 +233,7 @@ class OutputController extends Controller
             ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
             ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$end_km])
             ->first();
-            
+
         if ($start_km && $end_km !== null) {
             if (!$startPoint || !$endPoint) {
                 return response()->json([
@@ -160,9 +241,11 @@ class OutputController extends Controller
                     'missing' => [
                         'start_km' => !$startPoint ? $start_km : null,
                         'end_km' => !$endPoint ? $end_km : null,
-                    ]], 404);
+                    ]
+                ], 404);
             } else {
-                $data = DB::select("
+                $data = DB::select(
+                    "
                     WITH original_points AS (
                         SELECT 
                             ST_SetSRID(ST_MakePoint(:x1, :y1), 4326) AS geom1,
@@ -194,18 +277,20 @@ class OutputController extends Controller
                     )
                     
                     SELECT 
-                        ST_AsGeoJSON(ST_Intersection(bb.geom, ap.geom::geometry)) AS geojson
+                        ap.*, ST_AsGeoJSON(ST_Intersection(bb.geom, ap.geom::geometry)) AS geojson
                     FROM 
                         bounding_box bb
                     JOIN 
                         spatial_administratif_polygon ap ON ST_Intersects(bb.geom, ap.geom::geometry);
-                ", [
-                    'x1' => $startPoint->x,
-                    'y1' => $startPoint->y,
-                    'x2' => $endPoint->x,
-                    'y2' => $endPoint->y,
-                ]
-            );
+                ",
+                    [
+                        'x1' => $startPoint->x,
+                        'y1' => $startPoint->y,
+                        'x2' => $endPoint->x,
+                        'y2' => $endPoint->y,
+                    ]
+                );
+                dd($data);
 
                 $features = array_map(function ($item) {
                     return [
@@ -222,14 +307,13 @@ class OutputController extends Controller
 
                 return response()->json($featureCollection);
             }
-
         }
 
-    // Default return if no start or end km
+        // Default return if no start or end km
         $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")
             ->get()
             ->makeHidden('geom');
-        
+
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
@@ -240,8 +324,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getBatasDesaLine()
+    public function getBatasDesaLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_batas_desa_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = BatasDesaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -252,8 +344,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getBoxCulvertLine()
+    public function getBoxCulvertLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_box_culvert_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = BoxCulvertLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -300,8 +400,15 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getDataGeometrikJalanPolygon()
+    public function getDataGeometrikJalanPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_data_geometrik_jalan_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
         $data = DataGeometrikJalanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -540,8 +647,15 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPatokKMPoint()
+    public function getPatokKMPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_patok_km_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PatokKMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
