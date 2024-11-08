@@ -182,7 +182,7 @@ class OutputController extends Controller
                     ) AS geom
             )
             SELECT
-                ST_AsGeoJSON(ST_Intersection(bb.geom, tb.geom::geometry)) AS geojson
+               tb.*, ST_AsGeoJSON(ST_Intersection(bb.geom, tb.geom::geometry)) AS geojson
             FROM
                 bounding_box bb
             JOIN
@@ -195,10 +195,17 @@ class OutputController extends Controller
         ]);
 
         $features = array_map(function ($item) {
+            $properties = [];
+            foreach ($item as $key => $value) {
+                if ($key !== 'geom' && $key !== 'geojson') {
+                    $properties[$key] = $value;
+                }
+            }
+
             return [
                 'type' => 'Feature',
                 'geometry' => json_decode($item->geojson),
-                'properties' => new \stdClass(),
+                'properties' => $properties,
             ];
         }, $data);
 
@@ -207,6 +214,7 @@ class OutputController extends Controller
             "features" => $features,
         ];
     }
+
     public function getAdministratifPolygon($start_km = null, $end_km = null)
     {
         // $startPoint = DB::table('spatial_patok_km_point')
@@ -275,7 +283,7 @@ class OutputController extends Controller
                                 ), 4326
                             ) AS geom
                     )
-                    
+
                     SELECT 
                         ap.*, ST_AsGeoJSON(ST_Intersection(bb.geom, ap.geom::geometry)) AS geojson
                     FROM 
@@ -290,17 +298,25 @@ class OutputController extends Controller
                         'y2' => $endPoint->y,
                     ]
                 );
-                dd($data);
 
                 $features = array_map(function ($item) {
+                    // Buat array properties dari semua kolom di tabel kecuali 'geom' dan 'geojson'
+                    $properties = [];
+                    foreach ($item as $key => $value) {
+                        if ($key !== 'geom' && $key !== 'geojson'
+                        ) {
+                            $properties[$key] = $value;
+                        }
+                    }
+
                     return [
                         'type' => 'Feature',
                         'geometry' => json_decode($item->geojson),
-                        'properties' => new \stdClass(),
+                        'properties' => $properties,
                     ];
                 }, $data);
 
-                $featureCollection = [
+                return [
                     "type" => "FeatureCollection",
                     "features" => $features,
                 ];
@@ -313,9 +329,7 @@ class OutputController extends Controller
         $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")
             ->get()
             ->makeHidden('geom');
-
         $features = GeoJSONResource::collection($data);
-
         $featureCollection = [
             "type" => "FeatureCollection",
             "features" => $features,
@@ -364,8 +378,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getBPTLine()
+    public function getBPTLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_bpt_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = BPTLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -376,8 +398,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getBronjongLine()
+    public function getBronjongLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_bronjong_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = BronjongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -388,8 +418,14 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getConcreteBarrierLine()
+    public function getConcreteBarrierLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_concrete_barrier_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
         $data = ConcreteBarrierLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -419,8 +455,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getGerbangLine()
+    public function getGerbangLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+        
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_gerbang_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = GerbangLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -431,8 +475,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getGerbangPoint()
+    public function getGerbangPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_gerbang_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = GerbangPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -443,8 +495,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getGorongGorongLine()
+    public function getGorongGorongLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_gorong_gorong_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = GorongGorongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -455,8 +515,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getGuardrailLine()
+    public function getGuardrailLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_guardrail_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = GuardrailLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -467,8 +535,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getIRIPolygon()
+    public function getIRIPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_iri_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = IRIPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -479,8 +555,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getJalanLine()
+    public function getJalanLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_jalan_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = JalanLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -491,8 +575,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getJembatanPoint()
+    public function getJembatanPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_jembatan_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = JembatanPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -503,8 +595,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getJembatanPolygon()
+    public function getJembatanPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_jembatan_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = JembatanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -515,8 +615,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getLampuLalulintasPoint()
+    public function getLampuLalulintasPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_lampu_lalulintas_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = LampuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -527,8 +635,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getLapisPermukaanPolygon()
+    public function getLapisPermukaanPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_lapis_permukaan_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = LapisPermukaanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -539,8 +655,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getLapisPondasiAtas1Polygon()
+    public function getLapisPondasiAtas1Polygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_lapis_pondasi_atas1_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = LapisPondasiAtas1Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -551,8 +675,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getLapisPondasiAtas2Polygon()
+    public function getLapisPondasiAtas2Polygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_lapis_pondasi_atas2_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = LapisPondasiAtas2Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -563,8 +695,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getLapisPondasiBawahPolygon()
+    public function getLapisPondasiBawahPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_lapis_pondasi_bawah_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = LapisPondasiBawahPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -575,8 +715,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getLHRPolygon()
+    public function getLHRPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_lhr_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = LHRPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -587,8 +735,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getListrikBawahtanahLine()
+    public function getListrikBawahtanahLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_listrik_bawahtanah_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = ListrikBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -599,8 +755,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getManholePoint()
+    public function getManholePoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_manhole_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = ManholePoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -611,8 +775,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getMarkaLine()
+    public function getMarkaLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_marka_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = MarkaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -623,8 +795,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPagarOperasionalLine()
+    public function getPagarOperasionalLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_pagar_operasional_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PagarOperasionalLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -635,8 +815,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPatokHMPoint()
+    public function getPatokHMPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_patok_hm_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PatokHMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -666,8 +854,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPatokLJPoint()
+    public function getPatokLJPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_patok_lj_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PatokLJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -678,8 +874,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPatokPemanduPoint()
+    public function getPatokPemanduPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_patok_pemandu_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PatokPemanduPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -690,8 +894,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPatokRMJPoint()
+    public function getPatokRMJPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_patok_rmj_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PatokRMJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -702,8 +914,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPatokROWPoint()
+    public function getPatokROWPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_patok_row_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PatokROWPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -714,8 +934,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getPitaKejutLine()
+    public function getPitaKejutLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_pita_kejut_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = PitaKejutLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -726,8 +954,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getRambuLalulintasPoint()
+    public function getRambuLalulintasPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_rambu_lalulintas_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = RambuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -738,8 +974,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getRambuPenunjukarahPoint()
+    public function getRambuPenunjukarahPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_rambu_penunjukarah_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = RambuPenunjukarahPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -750,8 +994,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getReflektorPoint()
+    public function getReflektorPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_reflektor_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = ReflektorPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -762,8 +1014,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getRiolLine()
+    public function getRiolLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_riol_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = RiolLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -774,8 +1034,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getRumahKabelPoint()
+    public function getRumahKabelPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_rumah_kabel_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = RumahKabelPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -786,8 +1054,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getRuwasjaPolygon()
+    public function getRuwasjaPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_ruwasja_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = RuwasjaPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -798,8 +1074,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSaluranLine()
+    public function getSaluranLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_saluran_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SaluranLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -810,8 +1094,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSegmenKonstruksiPolygon()
+    public function getSegmenKonstruksiPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_segmen_konstruksi_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SegmenKonstruksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -822,8 +1114,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSegmenLegerPolygon()
+    public function getSegmenLegerPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_segmen_leger_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SegmenLegerPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -834,8 +1134,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSegmenPerlengkapanPolygon()
+    public function getSegmenPerlengkapanPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_segmen_perlengkapan_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SegmenPerlengkapanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -846,8 +1154,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSegmenSeksiPolygon()
+    public function getSegmenSeksiPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_segmen_seksi_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SegmenSeksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -858,8 +1174,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSegmenTolPolygon()
+    public function getSegmenTolPolygon($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_segmen_tol_polygon', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SegmenTolPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -870,8 +1194,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getStaTextPoint()
+    public function getStaTextPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_sta_text_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = StaTextPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -882,8 +1214,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getSungaiLine()
+    public function getSungaiLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_sungai_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = SungaiLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -894,8 +1234,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getTeleponBawahtanahLine()
+    public function getTeleponBawahtanahLine($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_telepon_bawahtanah_line', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = TeleponBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -906,8 +1254,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getTiangListrikPoint()
+    public function getTiangListrikPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_tiang_listrik_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = TiangListrikPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -918,8 +1274,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getTiangTeleponPoint()
+    public function getTiangTeleponPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_tiang_telepon_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+
         $data = TiangTeleponPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
@@ -930,8 +1294,16 @@ class OutputController extends Controller
         return response()->json($featureCollection);
     }
 
-    public function getVMSPoint()
+    public function getVMSPoint($start_km = null, $end_km = null)
     {
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getBoundingBoxData('spatial_vms_point', $startPoint, $endPoint);
+            return response()->json($featureCollection);
+        }
+        
         $data = VMSPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
