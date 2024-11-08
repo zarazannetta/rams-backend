@@ -1721,7 +1721,7 @@ class InputController extends Controller
                         panjang,
                         lebar,
                         tinggi,
-                        created_at, 
+                        created_at,
                         updated_at
                     )
                     VALUES (

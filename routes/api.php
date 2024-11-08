@@ -46,7 +46,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // Leger
     Route::post('leger/generate', [LegerController::class, 'generate']);
     Route::get('leger/get-data/{kode_leger}', [LegerController::class, 'getData']);
-    Route::get('leger/jalan_utama', [LegerController::class, 'getDataJalanUtama']);  
+    Route::get('leger/jalan_utama/{leger_id}', [LegerController::class, 'getDataJalanUtama']); 
+    Route::get('leger/jalan_utama_all', [LegerController::class, 'getDataJalanUtamaAll']);
+    Route::get('leger/ruas', [LegerController::class, 'getRuasSegmen']);
+    Route::get('leger/segmen/{jalan_tol_id}', [LegerController::class, 'getSegmen']);
 });
 
 
