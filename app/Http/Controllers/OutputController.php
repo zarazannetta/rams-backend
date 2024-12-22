@@ -9,64 +9,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 use App\Models\JalanTol;
-use App\Models\Spatial\{
-    AdministratifPolygon,
-    BatasDesaLine,
-    BoxCulvertLine,
-    BPTLine,
-    BronjongLine,
-    ConcreteBarrierLine,
-    DataGeometrikJalanPolygon,
-    GerbangLine,
-    GerbangPoint,
-    GorongGorongLine,
-    GuardRailLine,
-    IRIPolygon,
-    JalanLine,
-    JembatanPoint,
-    JembatanPolygon,
-    LampuLalulintasPoint,
-    LapisPermukaanPolygon,
-    LapisPondasiAtas1Polygon,
-    LapisPondasiAtas2Polygon,
-    LapisPondasiBawahPolygon,
-    LHRPolygon,
-    ListrikBawahtanahLine,
-    ManholePoint,
-    MarkaLine,
-    PagarOperasionalLine,
-    PatokHMPoint,
-    PatokKMPoint,
-    PatokLJPoint,
-    PatokPemanduPoint,
-    PatokRMJPoint,
-    PatokROWPoint,
-    PitaKejutLine,
-    RambuLalulintasPoint,
-    RambuPenunjukarahPoint,
-    ReflektorPoint,
-    RiolLine,
-    RumahKabelPoint,
-    RuwasjaPolygon,
-    SaluranLine,
-    SegmenKonstruksiPolygon,
-    SegmenLegerPolygon,
-    SegmenPerlengkapanPolygon,
-    SegmenSeksiPolygon,
-    SegmenTolPolygon,
-    StaTextPoint,
-    SungaiLine,
-    TeleponBawahtanahLine,
-    TiangListrikPoint,
-    TiangTeleponPoint,
-    VMSPoint
-};
+use App\Models\Spatial\{AdministratifPolygon, BatasDesaLine, BoxCulvertLine, BPTLine, BronjongLine, ConcreteBarrierLine, DataGeometrikJalanPolygon, GerbangLine, GerbangPoint, GorongGorongLine, GuardRailLine, IRIPolygon, JalanLine, JembatanPoint, JembatanPolygon, LampuLalulintasPoint, LapisPermukaanPolygon, LapisPondasiAtas1Polygon, LapisPondasiAtas2Polygon, LapisPondasiBawahPolygon, LHRPolygon, ListrikBawahtanahLine, ManholePoint, MarkaLine, PagarOperasionalLine, PatokHMPoint, PatokKMPoint, PatokLJPoint, PatokPemanduPoint, PatokRMJPoint, PatokROWPoint, PitaKejutLine, RambuLalulintasPoint, RambuPenunjukarahPoint, ReflektorPoint, RiolLine, RumahKabelPoint, RuwasjaPolygon, SaluranLine, SegmenKonstruksiPolygon, SegmenLegerPolygon, SegmenPerlengkapanPolygon, SegmenSeksiPolygon, SegmenTolPolygon, StaTextPoint, SungaiLine, TeleponBawahtanahLine, TiangListrikPoint, TiangTeleponPoint, VMSPoint};
 
 class OutputController extends Controller
 {
     public function getAset($type, Request $request)
     {
-        Log::info('Request Parameters: ', $request->all());
         $getFunctions = [
             'administratif_polygon' => 'getAdministratifPolygon',
             'batas_desa_line' => 'getBatasDesaLine',
@@ -143,16 +91,8 @@ class OutputController extends Controller
 
     private function getFilteredAssets($table, $start_km, $end_km)
     {
-
-        Log::info('Start KM LOG: ' . $start_km);
-        Log::info('End KM LOG: ' . $end_km);
-
         $startPoint = $this->getPointFromKM($start_km);
         $endPoint = $this->getPointFromKM($end_km);
-
-        // Log the start and end points
-        Log::info('Start Point LOG: ', (array)$startPoint);
-        Log::info('End Point LOG: ', (array)$endPoint);
 
         if (!$startPoint || !$endPoint) {
             return [
@@ -160,11 +100,10 @@ class OutputController extends Controller
                 'missing' => [
                     'start_km' => !$startPoint ? $start_km : null,
                     'end_km' => !$endPoint ? $end_km : null,
-                ]
+                ],
             ];
         }
 
-        Log::info('Query Table: ' . $table);
         $query = "
             WITH selected_points AS (
                 SELECT km, geom
@@ -191,7 +130,6 @@ class OutputController extends Controller
             'start_km' => $start_km,
             'end_km' => $end_km,
         ]);
-        Log::info('Filtered Assets Query Result: ', $data);
         $features = array_map(function ($item) {
             $properties = [];
             foreach ($item as $key => $value) {
@@ -208,19 +146,13 @@ class OutputController extends Controller
         }, $data);
 
         return [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
-        Log::info('Start KM: ' . $start_km);
-        Log::info('End KM: ' . $end_km);
-        Log::info('Start Point: ', (array)$startPoint);
-        Log::info('End Point: ', (array)$endPoint);
-
     }
-    
+
     public function getAdministratifPolygon($start_km = null, $end_km = null)
     {
-        
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_administratif_polygon', $start_km, $end_km);
 
@@ -231,13 +163,11 @@ class OutputController extends Controller
             return response()->json($featureCollection);
         }
         // Default return if no start or end km
-        $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")
-            ->get()
-            ->makeHidden('geom');
+        $data = AdministratifPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
 
         return response()->json($featureCollection);
@@ -245,8 +175,6 @@ class OutputController extends Controller
 
     public function getBatasDesaLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_batas_desa_line', $start_km, $end_km);
             if (isset($featureCollection['error'])) {
@@ -255,86 +183,79 @@ class OutputController extends Controller
             return response()->json($featureCollection);
         }
 
-        $data = BatasDesaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BatasDesaLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getBoxCulvertLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_box_culvert_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = BoxCulvertLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BoxCulvertLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getBPTLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_bpt_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = BPTLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BPTLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getBronjongLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_bronjong_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = BronjongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = BronjongLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getConcreteBarrierLine($start_km = null, $end_km = null)
     {
-        
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_concrete_barrier_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
-        $data = ConcreteBarrierLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ConcreteBarrierLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
@@ -348,828 +269,743 @@ class OutputController extends Controller
             }
             return response()->json($featureCollection);
         }
-        $data = DataGeometrikJalanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = DataGeometrikJalanPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getGerbangLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_gerbang_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = GerbangLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GerbangLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getGerbangPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_gerbang_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = GerbangPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GerbangPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getGorongGorongLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_gorong_gorong_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = GorongGorongLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GorongGorongLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getGuardrailLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_guardrail_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = GuardrailLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = GuardrailLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getIRIPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_iri_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = IRIPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = IRIPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getJalanLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_jalan_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = JalanLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = JalanLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getJembatanPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_jembatan_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = JembatanPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = JembatanPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getJembatanPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_jembatan_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = JembatanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = JembatanPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getLampuLalulintasPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_lampu_lalulintas_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = LampuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LampuLalulintasPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getLapisPermukaanPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_lapis_permukaan_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = LapisPermukaanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPermukaanPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getLapisPondasiAtas1Polygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_lapis_pondasi_atas1_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = LapisPondasiAtas1Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPondasiAtas1Polygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getLapisPondasiAtas2Polygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_lapis_pondasi_atas2_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = LapisPondasiAtas2Polygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPondasiAtas2Polygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getLapisPondasiBawahPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_lapis_pondasi_bawah_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = LapisPondasiBawahPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LapisPondasiBawahPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getLHRPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_lhr_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = LHRPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = LHRPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getListrikBawahtanahLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_listrik_bawahtanah_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = ListrikBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ListrikBawahtanahLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getManholePoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_manhole_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = ManholePoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ManholePoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getMarkaLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_marka_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = MarkaLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = MarkaLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPagarOperasionalLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_pagar_operasional_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PagarOperasionalLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PagarOperasionalLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPatokHMPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_patok_hm_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PatokHMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokHMPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPatokKMPoint($start_km = null, $end_km = null)
     {
-        
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_patok_km_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PatokKMPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokKMPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPatokLJPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_patok_lj_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PatokLJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokLJPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPatokPemanduPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_patok_pemandu_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PatokPemanduPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokPemanduPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPatokRMJPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_patok_rmj_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PatokRMJPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokRMJPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPatokROWPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_patok_row_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PatokROWPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PatokROWPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getPitaKejutLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_pita_kejut_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = PitaKejutLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = PitaKejutLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getRambuLalulintasPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_rambu_lalulintas_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = RambuLalulintasPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RambuLalulintasPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getRambuPenunjukarahPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_rambu_penunjukarah_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = RambuPenunjukarahPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RambuPenunjukarahPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getReflektorPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_reflektor_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = ReflektorPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = ReflektorPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getRiolLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_riol_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = RiolLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RiolLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getRumahKabelPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_rumah_kabel_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = RumahKabelPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RumahKabelPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getRuwasjaPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_ruwasja_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = RuwasjaPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = RuwasjaPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSaluranLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_saluran_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SaluranLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SaluranLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSegmenKonstruksiPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_segmen_konstruksi_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SegmenKonstruksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenKonstruksiPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSegmenLegerPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_segmen_leger_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SegmenLegerPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenLegerPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSegmenPerlengkapanPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_segmen_perlengkapan_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SegmenPerlengkapanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenPerlengkapanPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSegmenSeksiPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_segmen_seksi_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SegmenSeksiPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenSeksiPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSegmenTolPolygon($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_segmen_tol_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SegmenTolPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SegmenTolPolygon::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getStaTextPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_sta_text_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = StaTextPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = StaTextPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getSungaiLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_sungai_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = SungaiLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = SungaiLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getTeleponBawahtanahLine($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_telepon_bawahtanah_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = TeleponBawahtanahLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = TeleponBawahtanahLine::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getTiangListrikPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_tiang_listrik_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = TiangListrikPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = TiangListrikPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getTiangTeleponPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_tiang_telepon_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = TiangTeleponPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = TiangTeleponPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
 
     public function getVMSPoint($start_km = null, $end_km = null)
     {
-        
-
         if ($start_km && $end_km) {
             $featureCollection = $this->getFilteredAssets('spatial_vms_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
-        $data = VMSPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $data = VMSPoint::selectRaw('*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson')->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [
-            "type" => "FeatureCollection",
-            "features" => $features,
+            'type' => 'FeatureCollection',
+            'features' => $features,
         ];
         return response()->json($featureCollection);
     }
