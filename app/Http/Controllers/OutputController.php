@@ -66,6 +66,7 @@ class OutputController extends Controller
 {
     public function getAset($type, Request $request)
     {
+        Log::info('Request Parameters: ', $request->all());
         $getFunctions = [
             'administratif_polygon' => 'getAdministratifPolygon',
             'batas_desa_line' => 'getBatasDesaLine',
@@ -139,61 +140,58 @@ class OutputController extends Controller
             ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$km])
             ->first();
     }
-    private function getBoundingBoxData($table, $startPoint, $endPoint)
+
+    private function getFilteredAssets($table, $start_km, $end_km)
     {
+
+        Log::info('Start KM LOG: ' . $start_km);
+        Log::info('End KM LOG: ' . $end_km);
+
+        $startPoint = $this->getPointFromKM($start_km);
+        $endPoint = $this->getPointFromKM($end_km);
+
+        // Log the start and end points
+        Log::info('Start Point LOG: ', (array)$startPoint);
+        Log::info('End Point LOG: ', (array)$endPoint);
+
         if (!$startPoint || !$endPoint) {
-            return response()->json([
+            return [
                 'error' => 'Start or end km point not found',
                 'missing' => [
-                    'start_km' => !$startPoint ? 'Missing start_km' : null,
-                    'end_km' => !$endPoint ? 'Missing end_km' : null,
+                    'start_km' => !$startPoint ? $start_km : null,
+                    'end_km' => !$endPoint ? $end_km : null,
                 ]
-            ], 404);
+            ];
         }
 
-        $data = DB::select("
-            WITH original_points AS (
-                SELECT 
-                    ST_SetSRID(ST_MakePoint(:x1, :y1), 4326) AS geom1,
-                    ST_SetSRID(ST_MakePoint(:x2, :y2), 4326) AS geom2
+        Log::info('Query Table: ' . $table);
+        $query = "
+            WITH selected_points AS (
+                SELECT km, geom
+                FROM spatial_patok_km_point
+                WHERE CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER)
+                    BETWEEN CAST(REPLACE(REPLACE(:start_km, '+', ''), ' ', '') AS INTEGER)
+                    AND CAST(REPLACE(REPLACE(:end_km, '+', ''), ' ', '') AS INTEGER)
+                ORDER BY CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER)
             ),
-            projected_points AS (
-                SELECT 
-                    ST_Project(geom1::geography, 1000, radians(270))::geometry AS point_kiri1,
-                    ST_Project(geom1::geography, 1000, radians(90))::geometry AS point_kanan1,
-                    ST_Project(geom2::geography, 1000, radians(270))::geometry AS point_kiri2,
-                    ST_Project(geom2::geography, 1000, radians(90))::geometry AS point_kanan2
-                FROM original_points
+            line_path AS (
+                SELECT ST_MakeLine(geom ORDER BY km) AS line_geom
+                FROM selected_points
             ),
-            bounding_box AS (
-                SELECT 
-                    ST_SetSRID(
-                        ST_MakePolygon(
-                            ST_MakeLine(
-                                ARRAY[
-                                    (SELECT point_kiri1 FROM projected_points),
-                                    (SELECT point_kanan1 FROM projected_points),
-                                    (SELECT point_kanan2 FROM projected_points),
-                                    (SELECT point_kiri2 FROM projected_points),
-                                    (SELECT point_kiri1 FROM projected_points)
-                                ]
-                            )
-                        ), 4326
-                    ) AS geom
+            buffer_area AS (
+                SELECT ST_Buffer(line_geom::geography, 1000, 'endcap=flat join=round')::geometry AS buffer_geom
+                FROM line_path
             )
-            SELECT
-               tb.*, ST_AsGeoJSON(ST_Intersection(bb.geom, tb.geom::geometry)) AS geojson
-            FROM
-                bounding_box bb
-            JOIN
-                {$table} tb ON ST_Intersects(bb.geom, tb.geom::geometry);
-        ", [
-            'x1' => $startPoint->x,
-            'y1' => $startPoint->y,
-            'x2' => $endPoint->x,
-            'y2' => $endPoint->y,
-        ]);
+            SELECT ST_AsGeoJSON(ST_Intersection(ba.buffer_geom, tb.geom::geometry)) AS geojson, tb.*
+            FROM buffer_area ba
+            JOIN {$table} tb ON ST_Intersects(ba.buffer_geom, tb.geom::geometry);
+        ";
 
+        $data = DB::select($query, [
+            'start_km' => $start_km,
+            'end_km' => $end_km,
+        ]);
+        Log::info('Filtered Assets Query Result: ', $data);
         $features = array_map(function ($item) {
             $properties = [];
             foreach ($item as $key => $value) {
@@ -213,118 +211,25 @@ class OutputController extends Controller
             "type" => "FeatureCollection",
             "features" => $features,
         ];
-    }
+        Log::info('Start KM: ' . $start_km);
+        Log::info('End KM: ' . $end_km);
+        Log::info('Start Point: ', (array)$startPoint);
+        Log::info('End Point: ', (array)$endPoint);
 
+    }
+    
     public function getAdministratifPolygon($start_km = null, $end_km = null)
     {
-        // $startPoint = DB::table('spatial_patok_km_point')
-        //     ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
-        //     ->where('km', 'LIKE', '%' . $start_km . '%')
-        //     ->first();
+        
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_administratif_polygon', $start_km, $end_km);
 
-        // $endPoint = DB::table('spatial_patok_km_point')
-        //     ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
-        //     ->where('km', 'LIKE', '%' . $end_km . '%')
-        //     ->first();
-
-        // Normalize km format by removing '+' and any spaces
-        $start_km = $start_km ? str_replace(['+', ' '], '', $start_km) : null;
-        $end_km = $end_km ? str_replace(['+', ' '], '', $end_km) : null;
-
-        // Query start point and end point
-        $startPoint = DB::table('spatial_patok_km_point')
-            ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
-            ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$start_km])
-            ->first();
-
-        $endPoint = DB::table('spatial_patok_km_point')
-            ->select(DB::raw('ST_X(geom) as x, ST_Y(geom) as y'))
-            ->whereRaw("CAST(REPLACE(REPLACE(km, '+', ''), ' ', '') AS INTEGER) = ?", [$end_km])
-            ->first();
-
-        if ($start_km && $end_km !== null) {
-            if (!$startPoint || !$endPoint) {
-                return response()->json([
-                    'error' => 'Start or end km point not found',
-                    'missing' => [
-                        'start_km' => !$startPoint ? $start_km : null,
-                        'end_km' => !$endPoint ? $end_km : null,
-                    ]
-                ], 404);
-            } else {
-                $data = DB::select(
-                    "
-                    WITH original_points AS (
-                        SELECT 
-                            ST_SetSRID(ST_MakePoint(:x1, :y1), 4326) AS geom1,
-                            ST_SetSRID(ST_MakePoint(:x2, :y2), 4326) AS geom2
-                    ),
-                    projected_points AS (
-                        SELECT 
-                            ST_Project(geom1::geography, 1000, radians(270))::geometry AS point_kiri1,
-                            ST_Project(geom1::geography, 1000, radians(90))::geometry AS point_kanan1,
-                            ST_Project(geom2::geography, 1000, radians(270))::geometry AS point_kiri2,
-                            ST_Project(geom2::geography, 1000, radians(90))::geometry AS point_kanan2
-                        FROM original_points
-                    ),
-                    bounding_box AS (
-                        SELECT 
-                            ST_SetSRID(
-                                ST_MakePolygon(
-                                    ST_MakeLine(
-                                        ARRAY[
-                                            (SELECT point_kiri1 FROM projected_points),
-                                            (SELECT point_kanan1 FROM projected_points),
-                                            (SELECT point_kanan2 FROM projected_points),
-                                            (SELECT point_kiri2 FROM projected_points),
-                                            (SELECT point_kiri1 FROM projected_points)
-                                        ]
-                                    )
-                                ), 4326
-                            ) AS geom
-                    )
-
-                    SELECT 
-                        ap.*, ST_AsGeoJSON(ST_Intersection(bb.geom, ap.geom::geometry)) AS geojson
-                    FROM 
-                        bounding_box bb
-                    JOIN 
-                        spatial_administratif_polygon ap ON ST_Intersects(bb.geom, ap.geom::geometry);
-                ",
-                    [
-                        'x1' => $startPoint->x,
-                        'y1' => $startPoint->y,
-                        'x2' => $endPoint->x,
-                        'y2' => $endPoint->y,
-                    ]
-                );
-
-                $features = array_map(function ($item) {
-                    // Buat array properties dari semua kolom di tabel kecuali 'geom' dan 'geojson'
-                    $properties = [];
-                    foreach ($item as $key => $value) {
-                        if ($key !== 'geom' && $key !== 'geojson'
-                        ) {
-                            $properties[$key] = $value;
-                        }
-                    }
-
-                    return [
-                        'type' => 'Feature',
-                        'geometry' => json_decode($item->geojson),
-                        'properties' => $properties,
-                    ];
-                }, $data);
-
-                return [
-                    "type" => "FeatureCollection",
-                    "features" => $features,
-                ];
-
-                return response()->json($featureCollection);
+            if (isset($featureCollection['error'])) {
+                return response()->json($featureCollection, 404);
             }
-        }
 
+            return response()->json($featureCollection);
+        }
         // Default return if no start or end km
         $data = AdministratifPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")
             ->get()
@@ -340,11 +245,13 @@ class OutputController extends Controller
 
     public function getBatasDesaLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_batas_desa_line', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_batas_desa_line', $start_km, $end_km);
+            if (isset($featureCollection['error'])) {
+                return response()->json($featureCollection, 404);
+            }
             return response()->json($featureCollection);
         }
 
@@ -360,11 +267,10 @@ class OutputController extends Controller
 
     public function getBoxCulvertLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_box_culvert_line', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_box_culvert_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -380,11 +286,10 @@ class OutputController extends Controller
 
     public function getBPTLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_bpt_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_bpt_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -400,11 +305,10 @@ class OutputController extends Controller
 
     public function getBronjongLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_bronjong_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_bronjong_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -420,10 +324,9 @@ class OutputController extends Controller
 
     public function getConcreteBarrierLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_concrete_barrier_line', $startPoint, $endPoint);
+        
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_concrete_barrier_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
         $data = ConcreteBarrierLine::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
@@ -438,11 +341,11 @@ class OutputController extends Controller
 
     public function getDataGeometrikJalanPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
-
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_data_geometrik_jalan_polygon', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_data_geometrik_jalan_polygon', $start_km, $end_km);
+            if (isset($featureCollection['error'])) {
+                return response()->json($featureCollection, 404);
+            }
             return response()->json($featureCollection);
         }
         $data = DataGeometrikJalanPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
@@ -457,11 +360,10 @@ class OutputController extends Controller
 
     public function getGerbangLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
         
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_gerbang_line', $startPoint, $endPoint);
+
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_gerbang_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -477,11 +379,10 @@ class OutputController extends Controller
 
     public function getGerbangPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_gerbang_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_gerbang_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -497,11 +398,10 @@ class OutputController extends Controller
 
     public function getGorongGorongLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_gorong_gorong_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_gorong_gorong_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -517,11 +417,10 @@ class OutputController extends Controller
 
     public function getGuardrailLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_guardrail_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_guardrail_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -537,11 +436,10 @@ class OutputController extends Controller
 
     public function getIRIPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_iri_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_iri_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -557,11 +455,10 @@ class OutputController extends Controller
 
     public function getJalanLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_jalan_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_jalan_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -577,11 +474,10 @@ class OutputController extends Controller
 
     public function getJembatanPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_jembatan_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_jembatan_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -597,11 +493,10 @@ class OutputController extends Controller
 
     public function getJembatanPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_jembatan_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_jembatan_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -617,11 +512,10 @@ class OutputController extends Controller
 
     public function getLampuLalulintasPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_lampu_lalulintas_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_lampu_lalulintas_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -637,11 +531,10 @@ class OutputController extends Controller
 
     public function getLapisPermukaanPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_lapis_permukaan_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_lapis_permukaan_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -657,11 +550,10 @@ class OutputController extends Controller
 
     public function getLapisPondasiAtas1Polygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_lapis_pondasi_atas1_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_lapis_pondasi_atas1_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -677,11 +569,10 @@ class OutputController extends Controller
 
     public function getLapisPondasiAtas2Polygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_lapis_pondasi_atas2_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_lapis_pondasi_atas2_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -697,11 +588,10 @@ class OutputController extends Controller
 
     public function getLapisPondasiBawahPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_lapis_pondasi_bawah_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_lapis_pondasi_bawah_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -717,11 +607,10 @@ class OutputController extends Controller
 
     public function getLHRPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_lhr_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_lhr_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -737,11 +626,10 @@ class OutputController extends Controller
 
     public function getListrikBawahtanahLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_listrik_bawahtanah_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_listrik_bawahtanah_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -757,11 +645,10 @@ class OutputController extends Controller
 
     public function getManholePoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_manhole_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_manhole_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -777,11 +664,10 @@ class OutputController extends Controller
 
     public function getMarkaLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_marka_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_marka_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -797,11 +683,10 @@ class OutputController extends Controller
 
     public function getPagarOperasionalLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_pagar_operasional_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_pagar_operasional_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -817,11 +702,10 @@ class OutputController extends Controller
 
     public function getPatokHMPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_patok_hm_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_patok_hm_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -837,10 +721,9 @@ class OutputController extends Controller
 
     public function getPatokKMPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_patok_km_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_patok_km_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -856,11 +739,10 @@ class OutputController extends Controller
 
     public function getPatokLJPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_patok_lj_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_patok_lj_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -876,11 +758,10 @@ class OutputController extends Controller
 
     public function getPatokPemanduPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_patok_pemandu_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_patok_pemandu_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -896,11 +777,10 @@ class OutputController extends Controller
 
     public function getPatokRMJPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_patok_rmj_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_patok_rmj_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -916,11 +796,10 @@ class OutputController extends Controller
 
     public function getPatokROWPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_patok_row_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_patok_row_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -936,11 +815,10 @@ class OutputController extends Controller
 
     public function getPitaKejutLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_pita_kejut_line', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_pita_kejut_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -956,11 +834,10 @@ class OutputController extends Controller
 
     public function getRambuLalulintasPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_rambu_lalulintas_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_rambu_lalulintas_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -976,11 +853,10 @@ class OutputController extends Controller
 
     public function getRambuPenunjukarahPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_rambu_penunjukarah_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_rambu_penunjukarah_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -996,11 +872,10 @@ class OutputController extends Controller
 
     public function getReflektorPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_reflektor_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_reflektor_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1016,11 +891,10 @@ class OutputController extends Controller
 
     public function getRiolLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_riol_line', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_riol_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1036,11 +910,10 @@ class OutputController extends Controller
 
     public function getRumahKabelPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_rumah_kabel_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_rumah_kabel_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1056,11 +929,10 @@ class OutputController extends Controller
 
     public function getRuwasjaPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_ruwasja_polygon', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_ruwasja_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1076,11 +948,10 @@ class OutputController extends Controller
 
     public function getSaluranLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_saluran_line', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_saluran_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1096,11 +967,10 @@ class OutputController extends Controller
 
     public function getSegmenKonstruksiPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_segmen_konstruksi_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_segmen_konstruksi_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1116,11 +986,10 @@ class OutputController extends Controller
 
     public function getSegmenLegerPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_segmen_leger_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_segmen_leger_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1136,11 +1005,10 @@ class OutputController extends Controller
 
     public function getSegmenPerlengkapanPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_segmen_perlengkapan_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_segmen_perlengkapan_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1156,11 +1024,10 @@ class OutputController extends Controller
 
     public function getSegmenSeksiPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_segmen_seksi_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_segmen_seksi_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1176,11 +1043,10 @@ class OutputController extends Controller
 
     public function getSegmenTolPolygon($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_segmen_tol_polygon', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_segmen_tol_polygon', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1196,11 +1062,10 @@ class OutputController extends Controller
 
     public function getStaTextPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_sta_text_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_sta_text_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1216,11 +1081,10 @@ class OutputController extends Controller
 
     public function getSungaiLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_sungai_line', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_sungai_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1236,11 +1100,10 @@ class OutputController extends Controller
 
     public function getTeleponBawahtanahLine($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_telepon_bawahtanah_line', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_telepon_bawahtanah_line', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1256,11 +1119,10 @@ class OutputController extends Controller
 
     public function getTiangListrikPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_tiang_listrik_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_tiang_listrik_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1276,11 +1138,10 @@ class OutputController extends Controller
 
     public function getTiangTeleponPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
-        if($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_tiang_telepon_point', $startPoint, $endPoint);
+        if ($start_km && $end_km) {
+            $featureCollection = $this->getFilteredAssets('spatial_tiang_telepon_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
 
@@ -1296,14 +1157,13 @@ class OutputController extends Controller
 
     public function getVMSPoint($start_km = null, $end_km = null)
     {
-        $startPoint = $this->getPointFromKM($start_km);
-        $endPoint = $this->getPointFromKM($end_km);
+        
 
         if ($start_km && $end_km) {
-            $featureCollection = $this->getBoundingBoxData('spatial_vms_point', $startPoint, $endPoint);
+            $featureCollection = $this->getFilteredAssets('spatial_vms_point', $start_km, $end_km);
             return response()->json($featureCollection);
         }
-        
+
         $data = VMSPoint::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
         $features = GeoJSONResource::collection($data);
 
