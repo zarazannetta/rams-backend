@@ -19,5 +19,14 @@ class UserSeeder extends Seeder
                 'role_id' => 1,
             ]
         );
+        User::create(
+            [
+                'email' => 'rams_admin@arung.com',
+                'username' => 'Arung_Rams01',
+                'password' => Hash::make('Adminr4m5'),
+                'fullname' => 'Wawan Setyadi',
+                'role_id' => 1,
+            ]
+        );
     }
 }
