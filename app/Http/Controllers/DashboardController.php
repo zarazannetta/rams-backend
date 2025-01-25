@@ -16,11 +16,19 @@ class DashboardController extends Controller
     {
         $total_ruas = JalanTol::count();
         $jumlah_user = User::count();
-        $jumlah_ruas_user = JalanTol::where('user_id', Auth::user()->id)->count();
-        $jumlah_leger_user = Leger::where('user_id', Auth::user()->id)->count();
+        if (Auth::user()->id == 1) {
+            $jumlah_ruas_user = JalanTol::count();
+            $jumlah_leger_user = Leger::count();
+            $lhr = LHRPolygon::get();
+            $iri = IRIPolygon::get();
+        } else {
+            $jumlah_ruas_user = JalanTol::where('user_id', Auth::user()->id)->count();
+            $jumlah_leger_user = Leger::where('user_id', Auth::user()->id)->count();
+            $lhr = LHRPolygon::whereRelation('jalanTol', 'user_id', Auth::user()->id)->get();
+            $iri = IRIPolygon::whereRelation('jalanTol', 'user_id', Auth::user()->id)->get();
+        }
 
         // LHR
-        $lhr = LHRPolygon::whereRelation('jalanTol', 'user_id', Auth::user()->id)->get();
         $lhr_gol_i = $lhr->sum('gol_i');
         $lhr_gol_ii = $lhr->sum('gol_ii');
         $lhr_gol_iii = $lhr->sum('gol_iii');
@@ -28,7 +36,6 @@ class DashboardController extends Controller
         $lhr_gol_v = $lhr->sum('gol_v');
 
         // IRI
-        $iri = IRIPolygon::whereRelation('jalanTol', 'user_id', Auth::user()->id)->get();
         $iri_baik = $iri->where('nilai_iri', '<=', 4)->count();
         $iri_sedang = $iri->where('nilai_iri', '>', 4)->where('nilai_iri', '<=', 8)->count();
         $iri_rusak_ringan = $iri->where('nilai_iri', '>', 8)->where('nilai_iri', '<=', 12)->count();
