@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
                 'email' => 'rams_admin@arung.com',
                 'username' => 'Arung_Rams01',
                 'password' => Hash::make('Adminr4m5'),
-                'fullname' => 'Wawan Setyadi',
+                'fullname' => 'Admin Arung',
                 'role_id' => 1,
             ]
         );
