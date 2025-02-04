@@ -24,10 +24,16 @@ class DataJalanTeknik3Saluran extends Model
         'nilai_ke4_ki',
         'nilai_ke4_md',
         'nilai_ke4_ka',
+        'id_leger_jalan',
     ];
 
     public function jenisSaluran()
     {
         return $this->belongsTo(\App\Models\Teknik\JenisSaluran::class, 'jenis_saluran_id');
+    }
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
     }
 }

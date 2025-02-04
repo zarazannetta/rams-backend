@@ -15,5 +15,17 @@ class DataJalanTeknik2Bahujalan extends Model
         'nilai_ki_luar',
         'nilai_ka_dalam',
         'nilai_ka_luar',
+        'jenis_lapis_id',
+        'id_leger_jalan'
     ];
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
+    }
+
+    public function jenisLapis()
+    {
+        return $this->belongsTo(\App\Models\Teknik\JenisLapis::class, 'jenis_lapis_id');
+    }
 }

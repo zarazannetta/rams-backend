@@ -9,16 +9,16 @@ class DataJalanTeknik5Utilitas extends Model
     protected $table = 'data_jalan_teknik5_utilitas';
 
     protected $fillable = [
-        'jenis_sarana_id',
         'tahun',
         'uraian',
         'nilai_ki',
         'nilai_md',
         'nilai_ka',
+        'id_leger_jalan',
     ];
 
-    public function jenisSarana()
+    public function legerJalan()
     {
-        return $this->belongsTo(\App\Models\Teknik\JenisSarana::class, 'jenis_sarana_id');
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
     }
 }

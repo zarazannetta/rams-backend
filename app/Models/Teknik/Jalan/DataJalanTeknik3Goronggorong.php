@@ -15,5 +15,11 @@ class DataJalanTeknik3Goronggorong extends Model
         'nilai_ke2',
         'nilai_ke3',
         'nilai_ke4',
+        'id_leger_jalan',
     ];
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
+    }
 }

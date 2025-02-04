@@ -15,5 +15,11 @@ class DataJalanTeknik1 extends Model
         'data_perolehan',
         'nilai_perolehan',
         'bukti_perolehan',
+        'id_leger_jalan',
     ];
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
+    }
 }

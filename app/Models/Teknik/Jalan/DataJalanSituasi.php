@@ -4,9 +4,9 @@ namespace App\Models\Teknik\Jalan;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DataJalanGeometrik extends Model
+class DataJalanSituasi extends Model
 {
-    protected $table = 'data_jalan_geometrik';
+    protected $table = 'data_jalan_situasi';
 
     protected $fillable = [
         'tahun',

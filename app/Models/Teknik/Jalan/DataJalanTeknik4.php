@@ -14,5 +14,11 @@ class DataJalanTeknik4 extends Model
         'nilai_ki',
         'nilai_md',
         'nilai_ka',
+        'id_leger_jalan',
     ];
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
+    }
 }

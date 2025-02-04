@@ -46,15 +46,19 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // Leger
     Route::post('leger/generate', [LegerController::class, 'generate']);
     Route::get('leger/get-data/{kode_leger}', [LegerController::class, 'getData']);
-    Route::get('leger/jalan_utama/{leger_id}', [LegerController::class, 'getDataJalanUtama']); 
-    Route::get('leger/jalan_utama_all', [LegerController::class, 'getDataJalanUtamaAll']);
-    Route::get('leger/ruas', [LegerController::class, 'getRuasSegmen']);
+    Route::get('leger/jalan-utama/{jalan_tol_id}/{leger_id_awal}/{leger_id_akhir}', [LegerController::class, 'getDataJalanUtama']); 
+    Route::get('leger/jalan-utama-all/{jalan_tol_id}', [LegerController::class, 'getAllDataJalanUtama']);
+    Route::get('leger/ruas', [LegerController::class, 'getRuas']);
     Route::get('leger/segmen/{jalan_tol_id}', [LegerController::class, 'getSegmen']);
+    Route::get('leger/populate/{jalan_tol_id}', [LegerController::class,'populateLegerJalan']);
+    Route::get('leger/jalan-utama-map', [LegerController::class,'getLegerImage']);
+    Route::get('leger/jalan-utama-all-test/{jalan_tol_id}', [LegerController::class, 'getDataJalanUtamaAll']);
 });
 
 
 
 // Output Aset
 Route::get('data/aset/{type}', [OutputController::class, 'getAset']);
+Route::get('data/segmen/{awal}/{akhir}', [OutputController::class, 'getSegmenLegerPolygonSelection']);
 
 Route::post('/login', [AuthController::class, 'login']);

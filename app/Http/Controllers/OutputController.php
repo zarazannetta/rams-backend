@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\GeoJSONResource;
 
 use App\Models\JalanTol;
@@ -605,6 +606,27 @@ class OutputController extends Controller
     public function getSegmenLegerPolygon()
     {
         $data = SegmenLegerPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")->get()->makeHidden('geom');
+        $features = GeoJSONResource::collection($data);
+
+        $featureCollection = [
+            "type" => "FeatureCollection",
+            "features" => $features,
+        ];
+        return response()->json($featureCollection);
+    }
+
+    public function getSegmenLegerPolygonSelection($awal, $akhir)
+    {
+        $awalan = (int) substr($awal,2);
+        $akhiran = (int) substr($akhir,2);
+
+            //get all leger id that starts with "M" within range
+        $data = SegmenLegerPolygon::selectRaw("*, ST_AsGeoJSON(ST_Transform(geom::geometry, 4326)) AS geojson")
+        ->where('id_leger', 'like', 'M%')
+        ->whereBetween(DB::raw('CAST(SUBSTRING(id_leger, 3) AS INT)'), [$awalan, $akhiran])
+        ->orderBy(DB::raw('CAST(SUBSTRING(id_leger, 3) AS INT)'), 'asc')
+        ->get()->makeHidden('geom');
+        
         $features = GeoJSONResource::collection($data);
 
         $featureCollection = [

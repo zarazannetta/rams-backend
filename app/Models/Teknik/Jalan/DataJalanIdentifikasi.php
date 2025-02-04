@@ -40,6 +40,7 @@ class DataJalanIdentifikasi extends Model
         'titik_akhir_segmen_y',
         'titik_akhir_segmen_z',
         'titik_akhir_segmen_deskripsi',
+        'id_leger_jalan'
     ];
 
     public function kodeProvinsi()
@@ -60,5 +61,10 @@ class DataJalanIdentifikasi extends Model
     public function kodeDesakel()
     {
         return $this->belongsTo(\App\Models\Teknik\KodeDesakel::class, 'kode_desakel_id');
+    }
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
     }
 }

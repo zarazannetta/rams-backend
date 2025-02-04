@@ -11,4 +11,9 @@ class JenisSaluran extends Model
     protected $fillable = [
         'jenis',
     ];
+
+    public function dataJalanTeknik3Saluran()
+    {
+        return $this->hasMany(\App\Models\Teknik\Jalan\DataJalanTeknik3Saluran::class, 'jenis_sa_id', 'id');
+    }
 }

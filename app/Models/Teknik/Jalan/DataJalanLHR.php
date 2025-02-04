@@ -13,7 +13,12 @@ class DataJalanLHR extends Model
         'uraian',
         'lhr_ki',
         'lhr_ka',
-        'tarif_ki',
-        'tarif_ka',
+        'tarif',
+        'id_leger_jalan',
     ];
+
+    public function legerJalan()
+    {
+        return $this->belongsTo(\App\Models\Teknik\Jalan\LegerJalan::class, 'id_leger_jalan');
+    }
 }
