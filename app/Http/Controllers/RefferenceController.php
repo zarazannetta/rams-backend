@@ -10,7 +10,11 @@ class RefferenceController extends Controller
 {
     public function getRuasList()
     {
-        $data = JalanTol::where('user_id', Auth::user()->id)->get();
+        if (Auth::user()->id == 1) {
+            $data = JalanTol::get();
+        } else {
+            $data = JalanTol::where('user_id', Auth::user()->id)->get();
+        }
         return response()->json($data);
     }
 

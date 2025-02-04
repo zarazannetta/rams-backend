@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FilterController;
 use App\Http\Controllers\InputController;
 use App\Http\Controllers\OutputController;
 use App\Http\Controllers\LegerController;
@@ -55,6 +56,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('leger/jalan-utama-all-test/{jalan_tol_id}', [LegerController::class, 'getDataJalanUtamaAll']);
 });
 
+Route::get('/get-km-options', [FilterController::class, 'getKMOptions']);
+Route::post('/filter_assets', [FilterController::class, 'filterAssets']);
 
 
 // Output Aset
