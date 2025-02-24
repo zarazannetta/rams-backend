@@ -1328,12 +1328,29 @@ class LegerController extends Controller
     public function getAdministratif(Request $request)
     {
         $administratif = DB::table('spatial_administratif_polygon')
-            ->selectRaw('spatial_administratif_polygon.kode_prov, spatial_administratif_polygon.nama_prov, spatial_administratif_polygon.kode_kab, spatial_administratif_polygon.nama_kab, spatial_administratif_polygon.kode_kec, spatial_administratif_polygon.nama_kec, spatial_administratif_polygon.kode_desa, spatial_administratif_polygon.nama_desa')
-            ->join('spatial_segmen_leger_polygon', DB::raw('ST_Intersects(spatial_segmen_leger_polygon.geom::geometry, spatial_administratif_polygon.geom::geometry)'), '=', DB::raw('true'))
+            ->select('kode_prov', 'kode_kab', 'kode_kec', 'kode_desa')
+            ->join('spatial_segmen_leger_polygon', function ($join) {
+                $join->whereRaw('ST_Intersects(spatial_segmen_leger_polygon.geom::geometry, spatial_administratif_polygon.geom::geometry)');
+            })
             ->where('spatial_segmen_leger_polygon.id_leger', $request->leger_id)
             ->first();
-
-        return json_encode($administratif);
+        
+        if (!$administratif) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+        
+        // Ambil semua ID dalam satu query per tabel
+        $kode_prov = DB::table('reff_kode_provinsi')->where('kode', $administratif->kode_prov)->value('id');
+        $kode_kab = DB::table('reff_kode_kabkot')->where('kode', $administratif->kode_kab)->value('id');
+        $kode_kec = DB::table('reff_kode_kecamatan')->where('kode', $administratif->kode_kec)->value('id');
+        $kode_desa = DB::table('reff_kode_desakel')->where('kode', $administratif->kode_desa)->value('id');
+        
+        return response()->json([
+            'kode_prov' => $kode_prov,
+            'kode_kab'  => $kode_kab,
+            'kode_kec'  => $kode_kec,
+            'kode_desa' => $kode_desa,
+        ]);
     }
 
     public function getRumahKabel(Request $request)
