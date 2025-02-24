@@ -1331,7 +1331,7 @@ class LegerController extends Controller
             ->selectRaw('spatial_administratif_polygon.kode_prov, spatial_administratif_polygon.nama_prov, spatial_administratif_polygon.kode_kab, spatial_administratif_polygon.nama_kab, spatial_administratif_polygon.kode_kec, spatial_administratif_polygon.nama_kec, spatial_administratif_polygon.kode_desa, spatial_administratif_polygon.nama_desa')
             ->join('spatial_segmen_leger_polygon', DB::raw('ST_Intersects(spatial_segmen_leger_polygon.geom::geometry, spatial_administratif_polygon.geom::geometry)'), '=', DB::raw('true'))
             ->where('spatial_segmen_leger_polygon.id_leger', $request->leger_id)
-            ->get();
+            ->first();
 
         return json_encode($administratif);
     }
@@ -3027,6 +3027,7 @@ class LegerController extends Controller
             $request->merge(['leger_id' => $l->kode_leger]);
 
             $data[$l->kode_leger] = [
+                'administratif' => json_decode($this->getAdministratif($request), true),
                 'rambu_lalulintas_count' => json_decode($this->getRambuLaluLintas($request), true),
                 'gorong_gorong' => json_decode($this->getGorongGorong($request), true),
                 'data_geometrik_jalan' => json_decode($this->getDataGeometrikJalan($request), true),
@@ -3107,10 +3108,10 @@ class LegerController extends Controller
 
             $data_jalan_identifikasi =
             [
-                'kode_provinsi_id' => null,
-                'kode_kabkot_id' => null,
-                'kode_kecamatan_id' => null,
-                'kode_desakel_id' => null,
+                'kode_provinsi_id' => isset($d['administratif']['kode_prov']) ? $d['administratif']['kode_prov'] : null,
+                'kode_kabkot_id' => isset($d['administratif']['kode_kab']) ? $d['administratif']['kode_kab'] : null,
+                'kode_kecamatan_id' => isset($d['administratif']['kode_kec']) ? $d['administratif']['kode_kec'] : null,
+                'kode_desakel_id' => isset($d['administratif']['kode_desa']) ? $d['administratif']['kode_desa'] : null,
                 'nomor_ruas' => null,
                 'nomor_seksi' => null,
                 'deskripsi_seksi' => null,
