@@ -1345,7 +1345,7 @@ class LegerController extends Controller
         $kode_kec = DB::table('reff_kode_kecamatan')->where('kode', $administratif->kode_kec)->value('id');
         $kode_desa = DB::table('reff_kode_desakel')->where('kode', $administratif->kode_desa)->value('id');
         
-        return response()->json([
+        return json_encode([
             'kode_prov' => $kode_prov,
             'kode_kab'  => $kode_kab,
             'kode_kec'  => $kode_kec,
