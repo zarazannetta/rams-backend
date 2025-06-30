@@ -312,9 +312,9 @@ class LegerKantorController extends Controller
 
             $data[$l->kode_leger] = [
                 // IDENTIFIKASI
-                "data_gerbang_identifikasi" => dataKantorIdentifikasi::where("id_leger_kantor", $l->id)->first(),
+                "data_kantor_identifikasi" => dataKantorIdentifikasi::where("id_leger_kantor", $l->id)->first(),
                 // DATA TEKNIK 1
-                "data_gerbang_teknik1" => [
+                "data_kantor_teknik1" => [
                     "ruang_kepala_kantor" => dataKantorTeknik1::where("id_leger_kantor", $l->id)->where("uraian", "RUANG KEPALA KANTOR")->first(),
                     "ruang_staff" => dataKantorTeknik1::where("id_leger_kantor", $l->id)->where("uraian", "RUANG STAFF")->first(),
                     "ruang_rapat" => dataKantorTeknik1::where("id_leger_kantor", $l->id)->where("uraian", "RUANG RAPAT")->first(),
@@ -332,7 +332,7 @@ class LegerKantorController extends Controller
                 ],
 
                 // DATA TEKNIK 2
-                "data_gerbang_teknik2" => [
+                "data_kantor_teknik2" => [
                     "pagar_operasional_kantor" => dataKantorTeknik2::where("id_leger_kantor", $l->id)->where("uraian", "PAGAR OPERASIONAL KANTOR")->first(),
                     "rambu_lalu_lintas" => dataKantorTeknik2::where("id_leger_kantor", $l->id)->where("uraian", "RAMBU LALU LINTAS")->first(),
                     "lampu_lalu_lintas" => dataKantorTeknik2::where("id_leger_kantor", $l->id)->where("uraian", "LAMPU LALU LINTAS")->first(),
@@ -345,7 +345,7 @@ class LegerKantorController extends Controller
                 ],
 
                 // LUAS LAHAN
-                "data_gerbang_luas_lahan" => [
+                "data_kantor_luas_lahan" => [
                     "bangunan" => dataKantorLuasLahan::where("id_leger_kantor", $l->id)->where("uraian", "BANGUNAN")->first(),
                     "tanah" => dataKantorLuasLahan::where("id_leger_kantor", $l->id)->where("uraian", "TANAH")->first(),
                 ]
